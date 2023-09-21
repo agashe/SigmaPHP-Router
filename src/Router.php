@@ -2,6 +2,7 @@
 
 namespace SigmaPHP\Router;
 
+use SigmaPHP\Router\Interfaces\RouterInterface;
 use SigmaPHP\Router\Exceptions\RouteNotFoundException;
 use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
@@ -11,7 +12,7 @@ use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 /**
  * Router
  */
-class Router
+class Router implements RouterInterface
 {
     /**
      * @var array $routes
@@ -51,7 +52,7 @@ class Router
     }
 
     /**
-     * Process routes
+     * Process routes.
      * 
      * @param array $routes
      * @return array
@@ -95,10 +96,10 @@ class Router
             $route['path'] = trim($route['path'], '/');
 
             if (
-                array_search(
+                (array_search(
                     $route['path'],
                     array_column($allRoutes, 'path')
-                ) && !isset($route['optional'])
+                ) !== false) && !isset($route['optional'])
             ) {
                 throw new DuplicatedRoutesException(
                     "Route [{$route['path']}] is defined multiple times"
@@ -139,7 +140,7 @@ class Router
     }
 
     /**
-     * Check if route exists
+     * Check if route exists.
      * 
      * @param string $method
      * @param string $path
@@ -161,7 +162,9 @@ class Router
                             "($value)",
                             $route['path']
                         );
-                    } else if (strpos($route['path'], '{' . $key . '}') !== false) {
+                    } else if (strpos(
+                        $route['path'], '{' . $key . '}') !== false
+                    ) {
                         $route['path'] = str_replace(
                             '{' . $key . '}',
                             "($value)",
@@ -196,7 +199,7 @@ class Router
     }
 
     /**
-     * Default page not found handler
+     * Default page not found handler.
      * 
      * @return void
      */
@@ -208,7 +211,7 @@ class Router
     }
 
     /**
-     * Set page not found handler
+     * Set page not found handler.
      * 
      * @param string $handler 
      * @return void
@@ -219,7 +222,7 @@ class Router
     }
 
     /**
-     * Generate URL from route's name
+     * Generate URL from route's name.
      * 
      * @param string $routeName
      * @param array $parameters
@@ -277,7 +280,7 @@ class Router
     }
 
     /**
-     * Run the router
+     * Run the router.
      * 
      * @return void
      */
@@ -288,9 +291,11 @@ class Router
 
         // In case the router was used in sub-directory
         // we remove the host (sub-directory) from the URI
-        $cleanUri = str_replace($this->host, '', $uri);
+        if (!empty($this->host)) {
+            $uri = str_replace($this->host, '', $uri);
+        }
 
-        $matchedRoute = $this->match($method, $cleanUri);
+        $matchedRoute = $this->match($method, $uri);
 
         if (empty($matchedRoute)) {
             if (!empty($this->pageNotFoundHandler)) {
