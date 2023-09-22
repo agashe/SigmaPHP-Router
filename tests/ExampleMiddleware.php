@@ -7,6 +7,6 @@ class ExampleMiddleware
 {
     public function handler()
     {
-        echo "hello another middleware" . PHP_EOL;
+        echo 'Middleware is working.';
     }
 }

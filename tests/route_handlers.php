@@ -16,3 +16,7 @@ function route_handler_c($data1, $data2, $data3) {
 function route_handler_d($data = 'nothing was received') {
     echo $data;
 }
+
+function route_not_found_handler() {
+    echo "This is a custom page not found handler";
+}

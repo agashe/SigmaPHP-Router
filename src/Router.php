@@ -207,7 +207,6 @@ class Router implements RouterInterface
     {
         http_response_code(404);
         echo "404 , The Requested URL Is Not Found";
-        die();
     }
 
     /**
@@ -303,10 +302,12 @@ class Router implements RouterInterface
             } else {
                 $this->defaultPageNotFoundHandler();
             }
+
+            return;
         }
 
         if (
-            !is_string($matchedRoute['action']) ||
+            !isset($matchedRoute['action']) ||
             empty($matchedRoute['action'])
         ) {
             throw new ActionIsNotDefinedException(

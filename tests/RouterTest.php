@@ -53,7 +53,7 @@ class RouterTest extends TestCase
             [
                 'name' => 'test3',
                 'path' => '/test3/{data1}/{data2}/test/{data3}',
-                'method' => 'any',
+                'method' => 'get',
                 'action' => 'route_handler_c'
             ],
             [
@@ -64,46 +64,48 @@ class RouterTest extends TestCase
             ],
             [
                 'name' => 'test5',
-                'path' => '/basic/{bar?}',
-                'method' => 'put',
-                'middlewares' => [
-                    [MyMiddleware::class, 'handler'],
-                    [AnotherMiddleware::class, 'handler']
-                ],
-                'controller' => BasicController::class,
-                'action' => 'foo'
+                'path' => '/test5/controller',
+                'method' => 'get',
+                'controller' => ExampleController::class,
+                'action' => 'index'
             ],
             [
                 'name' => 'test6',
-                'path' => '/get/user/age/{age?}',
+                'path' => '/test6/middleware',
                 'method' => 'get',
-                'action' => 'test_validate_handler',
+                'middlewares' => [
+                    [ExampleMiddleware::class, 'handler'],
+                ],
+                'controller' => ExampleController::class,
+                'action' => 'index'
+            ],
+            [
+                'name' => 'test7',
+                'path' => '/test7/validation/{data}',
+                'method' => 'get',
+                'action' => 'route_handler_d',
                 'validation' => [
-                    'age' => '[0-9]+'
+                    'data' => '[0-9]+'
                 ]
             ],
             [
-                'group' => 'api',
-                'path' => 'api/',
+                'name' => 'test8',
+                'path' => '/test8/any-method/{data}',
+                'method' => 'any',
+                'action' => 'route_handler_d',
+            ],
+            [
+                'group' => 'test_group',
+                'path' => 'test-group/',
                 'middlewares' => [
-                    [MyMiddleware::class, 'handler'],
+                    [ExampleMiddleware::class, 'handler'],
                 ],
                 'routes' => [
                     [
-                        'name' => 'posts1',
-                        'path' => '/posts',
+                        'name' => 'test9',
+                        'path' => '/test9',
                         'method' => 'post',
-                        'middlewares' => [
-                            [AnotherMiddleware::class, 'handler']
-                        ],
-                        'controller' => BasicController::class,
-                        'action' => 'test'
-                    ],
-                    [
-                        'name' => 'posts2',
-                        'path' => 'posts/{id?}',
-                        'method' => 'get',
-                        'controller' => BasicController::class,
+                        'controller' => ExampleController::class,
                         'action' => 'index'
                     ],
                 ]
@@ -294,12 +296,253 @@ class RouterTest extends TestCase
         $router = new Router($duplicatedRoutes);
     }
 
-    // test controller
-    // test middlewares
-    // test exceptions for both
-    // test not found page
-    // test not found page custom handler
-    // test route groups
-    // test url generation
+    /**
+     * Test router can call actions from controller.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanCallActionsFromController()
+    {
+        $_SERVER['REQUEST_URI'] = '/test5/controller';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
 
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("Example Controller Index Method");
+    }
+    
+    /**
+     * Test router run middlewares before action execution.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterRunMiddlewaresBeforeActionExecution()
+    {
+        $_SERVER['REQUEST_URI'] = '/test6/middleware';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Middleware is working.Example Controller Index Method"
+        );
+    }
+
+    /**
+     * Test router can validate parameters.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanValidateParameters()
+    {
+        $_SERVER['REQUEST_URI'] = '/test7/validation/wrong';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "404 , The Requested URL Is Not Found"
+        );
+    }
+
+    /**
+     * Test route can use any HTTP method.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouteCanUseAnyHTTPMethod()
+    {
+        $_SERVER['REQUEST_URI'] = '/test8/any-method/data';
+        $_SERVER['REQUEST_METHOD'] = 'PUT';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("data");
+    }
+
+    /**
+     * Test router will through exception if the action doesn't exist.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfTheActionDoesNotExist()
+    {
+        $this->expectException(ActionIsNotDefinedException::class);
+
+        $duplicatedRoutes = array_merge($this->routes, [
+            [
+                'name' => 'testNoAction',
+                'path' => '/no-action',
+                'method' => 'get',
+            ]
+        ]);  
+        
+        $router = new Router($duplicatedRoutes);
+
+        $_SERVER['REQUEST_URI'] = '/no-action';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // run the router
+        $router->run();
+    }
+
+    /**
+     * Test router can handle page not found.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanHandlePageNotFound()
+    {
+        $_SERVER['REQUEST_URI'] = '/page-not-found';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "404 , The Requested URL Is Not Found"
+        );
+    }
+
+    /**
+     * Test router can use custom handler for page not found.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanUseCustomHandlerForPageNotFound()
+    {
+        $_SERVER['REQUEST_URI'] = '/page-not-found';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set custom page not found handler
+        $router->setPageNotFoundHandler('route_not_found_handler');
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "This is a custom page not found handler"
+        );
+    }
+
+    /**
+     * Test route groups.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouteGroups()
+    {
+        $_SERVER['REQUEST_URI'] = '/test-group/test9';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Middleware is working.Example Controller Index Method"
+        );
+    }
+
+    /**
+     * Test router can generate url from route name.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanGenerateUrlFromRouteName()
+    {
+        $_SERVER['HTTPS'] = null;
+        $_SERVER['HTTP_HOST'] = 'localhost';
+
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // assert result
+        $this->assertEquals(
+            $router->URL('test1'),
+            'http://localhost/test1/static'
+        );
+    }
+
+    /**
+     * Test router will through exception if route name doesn't exist for url 
+     * generation.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfRouteNameDoesNotExist()
+    {
+        $this->expectException(RouteNotFoundException::class);
+
+        $_SERVER['HTTPS'] = null;
+        $_SERVER['HTTP_HOST'] = 'localhost';
+
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // generate route
+        $router->url('unknown_route');
+    }
+
+    /**
+     * Test router will through exception if required parameters weren't passed
+     * when creating url from route name.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfParametersWereNotPassed()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $_SERVER['HTTPS'] = null;
+        $_SERVER['HTTP_HOST'] = 'localhost';
+
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // generate route
+        $router->url('test2');
+    }
 }
