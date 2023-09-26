@@ -104,24 +104,39 @@ class Router implements RouterInterface
         foreach ($routes as $route) {
             $route['path'] = trim($route['path'], '/');
 
-            if (
-                (array_search(
+            // check for duplicated routes
+            if (!isset($route['optional'])) {
+                $similarRouteId = array_search(
                     $route['path'],
                     array_column($allRoutes, 'path')
-                ) !== false) && !isset($route['optional'])
-            ) {
-                throw new DuplicatedRoutesException(
-                    "Route [{$route['path']}] is defined multiple times"
                 );
-            }
-
-            if (
-                in_array($route['name'], array_column($allRoutes, 'name')) &&
-                !isset($route['optional'])
-            ) {
-                throw new DuplicatedRouteNamesException(
-                    "Route [{$route['name']}] is defined multiple times"
-                );
+    
+                $similarRouteMethod = false;
+                
+                if (
+                    ($similarRouteId !== false) && (
+                        ((!isset($route['method']) || 
+                            empty($route['method'])) &&
+                        (!isset($routes[$similarRouteId]['method']) || 
+                            empty($routes[$similarRouteId]['method']))) ||
+                        ($routes[$similarRouteId]['method'] == $route['method'])
+                    )
+                ) {
+                    $similarRouteMethod = true;
+                }
+    
+                if ($similarRouteMethod == true) {
+                    throw new DuplicatedRoutesException(
+                        "Route [{$route['path']}] is defined multiple times"
+                    );
+                }
+    
+                if (in_array($route['name'], array_column($allRoutes, 'name')))
+                {
+                    throw new DuplicatedRouteNamesException(
+                        "Route [{$route['name']}] is defined multiple times"
+                    );
+                }            
             }
 
             // validate route methods
