@@ -109,7 +109,12 @@ class RouterTest extends TestCase
                         'action' => 'index'
                     ],
                 ]
-            ]
+            ],
+            [
+                'name' => 'test10',
+                'path' => '/test10/default-method',
+                'action' => 'route_handler_a'
+            ],
         ];
     }
 
@@ -359,7 +364,7 @@ class RouterTest extends TestCase
 
         // assert result
         $this->expectOutputString(
-            "404 , The Requested URL Is Not Found"
+            "404 , The Requested URL Was Not Found"
         );
     }
 
@@ -430,7 +435,7 @@ class RouterTest extends TestCase
 
         // assert result
         $this->expectOutputString(
-            "404 , The Requested URL Is Not Found"
+            "404 , The Requested URL Was Not Found"
         );
     }
 
@@ -565,5 +570,48 @@ class RouterTest extends TestCase
             $router->URL('test_group.test9'),
             'http://localhost/test-group/test9'
         );
+    }
+
+    /**
+     * Test router will through exception if the route methods are invalid.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfTheRouteMethodsAreInvalid()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $routes = array_merge($this->routes, [
+            [
+                'name' => 'testX',
+                'path' => '/test-invalid-http-method',
+                'method' => 'my-custom-method',
+                'action' => 'route_handler_a',
+            ]
+        ]);  
+        
+        $router = new Router($routes);
+    }
+
+    /**
+     * Test router will set the default HTTP method to GET if was not specified.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillSetDefaultHTTPMethodToGETIfWasNotSpecified()
+    {
+        $_SERVER['REQUEST_URI'] = '/test10/default-method';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("some data");
     }
 }

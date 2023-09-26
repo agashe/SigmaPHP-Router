@@ -30,6 +30,15 @@ class Router implements RouterInterface
     private $pageNotFoundHandler;
 
     /**
+     * @var array $httpMethods
+     */
+    private $httpMethods = [
+        'get'    , 'post'   , 'put',
+        'patch'  , 'delete' , 'head',
+        'connect', 'options', 'trace',
+    ];
+
+    /**
      * Router Constructor
      * 
      * @param array $routes
@@ -115,6 +124,25 @@ class Router implements RouterInterface
                 );
             }
 
+            // validate route methods
+            if (isset($route['method'])) {
+                $route['method'] = trim($route['method'], ',');
+
+                $route['method'] = ($route['method'] == 'any') ?
+                    $this->httpMethods :
+                    explode(',', strtolower($route['method']));
+
+                if (count(array_intersect($this->httpMethods, $route['method']))
+                    != count($route['method'])
+                ) {
+                    throw new InvalidArgumentException(
+                        "Invalid HTTP methods for route {$route['path']}"
+                    );
+                }
+            } else {
+                $route['method'] = ['get'];
+            }
+
             if (strpos($route['path'], '?}') !== false) {
                 // we save 2 copy of the route , one with optional parameter
                 // and one without the parameter , then we use the flag 
@@ -179,14 +207,10 @@ class Router implements RouterInterface
                 '([^\/]*)',
                 $route['path']
             );
-
-            $routeMethods = ($route['method'] == 'any') ?
-                [strtolower($method)] :
-                explode(',', strtolower($route['method']));
-
+            
             if (
                 preg_match('~^' . $pathPrepared . '$~', $path, $parameters) &&
-                in_array(strtolower($method), $routeMethods)
+                in_array(strtolower($method), $route['method'])
             ) {
                 unset($parameters[0]);
                 $parameters = array_values($parameters);
