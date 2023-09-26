@@ -206,7 +206,7 @@ class Router implements RouterInterface
     private function defaultPageNotFoundHandler()
     {
         http_response_code(404);
-        echo "404 , The Requested URL Is Not Found";
+        echo "404 , The Requested URL Was Not Found";
     }
 
     /**
