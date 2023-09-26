@@ -73,7 +73,7 @@ class Router implements RouterInterface
         });
 
         foreach ($routeGroups as $routeGroup) {
-            $routeGroup['path'] = trim($routeGroup['path'], '/');
+            $routeGroup['prefix'] = trim($routeGroup['prefix'], '/');
 
             foreach ($routeGroup['routes'] as $route) {
                 $route['path'] = trim($route['path'], '/');
@@ -84,7 +84,7 @@ class Router implements RouterInterface
                         $routeGroup['middlewares']
                     ) : $routeGroup['middlewares'];
 
-                $route['path'] = $routeGroup['path'] . '/' . $route['path'];
+                $route['path'] = $routeGroup['prefix'] . '/' . $route['path'];
                 $route['name'] = $routeGroup['group'] . '.' . $route['name'];
 
                 $routes[] = $route;

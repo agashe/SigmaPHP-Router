@@ -96,7 +96,7 @@ class RouterTest extends TestCase
             ],
             [
                 'group' => 'test_group',
-                'path' => 'test-group/',
+                'prefix' => 'test-group/',
                 'middlewares' => [
                     [ExampleMiddleware::class, 'handler'],
                 ],
@@ -544,5 +544,26 @@ class RouterTest extends TestCase
 
         // generate route
         $router->url('test2');
+    }
+
+    /**
+     * Test route group prefix is added to routes name.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouteGroupPrefixIsAddedToRoutesName()
+    {
+        $_SERVER['HTTPS'] = null;
+        $_SERVER['HTTP_HOST'] = 'localhost';
+
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // assert result
+        $this->assertEquals(
+            $router->URL('test_group.test9'),
+            'http://localhost/test-group/test9'
+        );
     }
 }

@@ -375,7 +375,7 @@ $routes = [
 
 The only items required for a group is the group name and the routes array. The name will be added to all of its routes , so in the example above , the final route name will be : `api.users.profile` and the route path : `/api/v1/users/profile`
 
-Both `path` and `middlewares` are optional , a routes group could either has path , middlewares , both or non of them.
+Both `prefix` and `middlewares` are optional , a routes group could either has prefix , middlewares , both or non of them.
 
 For the routes definition , nothing changed all features are implemented as regular routes.
 
