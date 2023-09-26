@@ -11,6 +11,7 @@ A fast and simple router for PHP , you can use for your projects to provide user
 * Support `any` method , so the route can accept all HTTP methods
 * Routes Validation using regex expressions
 * Actions can be implemented as regular functions or controller's method
+* Support for Single Action Controllers
 * Middlewares , that can be run before your route
 * Route Groups which support middlewares and prefix
 * URL generation using the route name
@@ -179,6 +180,8 @@ $routes = [
 ];
 ```
 
+If no HTTP was provided , then the HTP method for the route will be automatically set to GET
+
 ### Parameters
 Route parameters follow the placeholder style (like Laravel) : 
 
@@ -299,6 +302,33 @@ $routes = [
 
 function create_about_page() {
     print "About Us";
+}
+```
+Finally SigmaPHP-Router also has support for Single Action Controllers , so no need to pass action name ,
+and the router will automatically search for the PHP magic method `__invoke()` to run :
+
+```
+$routes = [
+    [
+        'name' => 'notification.send_email',
+        'path' => '/notification/send-email',
+        'method' => 'post',
+        'controller' => SendEmailController::class,
+    ],
+];
+```
+And in the SendEmailController :
+
+```
+// SendEmailController.php
+<?php
+
+class SendEmailController
+{
+   public function __invoke()
+   {
+        // .... some code to send email
+   } 
 }
 ```
 

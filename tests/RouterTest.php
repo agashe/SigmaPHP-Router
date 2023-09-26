@@ -10,6 +10,7 @@ use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 
 require('ExampleController.php');
+require('ExampleSingleActionController.php');
 require('ExampleMiddleware.php');
 require('route_handlers.php');
 
@@ -114,6 +115,12 @@ class RouterTest extends TestCase
                 'name' => 'test10',
                 'path' => '/test10/default-method',
                 'action' => 'route_handler_a'
+            ],
+            [
+                'name' => 'test11',
+                'path' => '/test11/single-action-controller',
+                'method' => 'get',
+                'controller' => ExampleSingleActionController::class,
             ],
         ];
     }
@@ -613,5 +620,27 @@ class RouterTest extends TestCase
 
         // assert result
         $this->expectOutputString("some data");
+    }
+
+
+    /**
+     * Test single action controller.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testSingleActionController()
+    {
+        $_SERVER['REQUEST_URI'] = '/test11/single-action-controller';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("Single Action Controller");
     }
 }

@@ -330,13 +330,24 @@ class Router implements RouterInterface
             return;
         }
 
-        if (
-            !isset($matchedRoute['action']) ||
-            empty($matchedRoute['action'])
+        if ((!isset($matchedRoute['action']) || empty($matchedRoute['action']))
+            &&
+            (!isset($matchedRoute['controller']) || 
+            empty($matchedRoute['controller']))
         ) {
             throw new ActionIsNotDefinedException(
                 "Route {$matchedRoute['path']} doesn't have valid action"
             );
+        }
+        
+        // handle single action controller , we assume that only "__invoke"
+        // magic method exists in the controller , so we call it
+        if ((!isset($matchedRoute['action']) || empty($matchedRoute['action']))
+            &&
+            (isset($matchedRoute['controller']) && 
+            !empty($matchedRoute['controller']))
+        ) {
+            $matchedRoute['action'] = '__invoke';
         }
 
         if (
