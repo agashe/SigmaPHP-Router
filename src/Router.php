@@ -82,18 +82,31 @@ class Router implements RouterInterface
         });
 
         foreach ($routeGroups as $routeGroup) {
-            $routeGroup['prefix'] = trim($routeGroup['prefix'], '/');
-
             foreach ($routeGroup['routes'] as $route) {
                 $route['path'] = trim($route['path'], '/');
 
-                $route['middlewares'] = isset($route['middlewares']) ?
-                    array_merge(
-                        $route['middlewares'],
-                        $routeGroup['middlewares']
-                    ) : $routeGroup['middlewares'];
+                // add middlewares to the group routes , if was provided
+                if (isset($routeGroup['middlewares']) && 
+                    !empty($routeGroup['middlewares'])
+                ) {
 
-                $route['path'] = $routeGroup['prefix'] . '/' . $route['path'];
+                    $route['middlewares'] = isset($route['middlewares']) ?
+                        array_merge(
+                            $route['middlewares'],
+                            $routeGroup['middlewares']
+                        ) : $routeGroup['middlewares'];
+                }
+
+                // add prefix to the group routes , if was provided
+                if (isset($routeGroup['prefix']) && 
+                    !empty($routeGroup['prefix'])
+                ) {
+                    $routeGroup['prefix'] = trim($routeGroup['prefix'], '/');
+                    $route['path'] = $routeGroup['prefix'] . 
+                        '/' . $route['path'];
+                }
+
+                // add group name to its routes
                 $route['name'] = $routeGroup['group'] . '.' . $route['name'];
 
                 $routes[] = $route;
