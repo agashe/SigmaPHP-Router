@@ -88,7 +88,7 @@ class Router implements RouterInterface
                 );
             }
 
-            foreach ($routeGroup['routes'] as $route) {
+            foreach ($routeGroup['routes'] as $key => $route) {
                 $route['path'] = trim($route['path'], '/');
 
                 // add middlewares to the group routes , if was provided
@@ -113,15 +113,27 @@ class Router implements RouterInterface
                 }
 
                 // add group name to its routes
-                $route['name'] = $routeGroup['group'] . '.' . $route['name'];
+                // Please Note : if the route has no name , then we use the
+                // item key as a name
+                if (isset($route['name']) && !empty($route['name'])) {
+                    $route['name'] = $routeGroup['group'] .
+                        '.' . $route['name'];
+                } else {
+                    $route['name'] = $routeGroup['group'] . '.' . $key;
+                }
 
                 $routes[] = $route;
             }
         }
 
         // handle optional parameters and check for duplicated routes !!
-        foreach ($routes as $route) {
+        foreach ($routes as $key => $route) {
             $route['path'] = trim($route['path'], '/');
+
+            // check route's name , and if empty use the its array key as name
+            if (!isset($route['name']) || empty($route['name'])) {
+                $route['name'] = $key;
+            }
 
             // check for duplicated routes
             if (!isset($route['optional'])) {
