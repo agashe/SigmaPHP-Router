@@ -82,6 +82,12 @@ class Router implements RouterInterface
         });
 
         foreach ($routeGroups as $routeGroup) {
+            if (!isset($routeGroup['routes']) || empty($routeGroup['routes'])) {
+                throw new InvalidArgumentException(
+                    "Routes can't be empty for group [{$routeGroup['group']}]"
+                );
+            }
+
             foreach ($routeGroup['routes'] as $route) {
                 $route['path'] = trim($route['path'], '/');
 
