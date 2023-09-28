@@ -364,8 +364,10 @@ class Router implements RouterInterface
             $uri = str_replace($this->host, '', $uri);
         }
 
+        // match the route
         $matchedRoute = $this->match($method, $uri);
 
+        // handle page not found case
         if (empty($matchedRoute)) {
             if (!empty($this->pageNotFoundHandler)) {
                 call_user_func($this->pageNotFoundHandler);
@@ -376,6 +378,7 @@ class Router implements RouterInterface
             return;
         }
 
+        // check if the route has a valid action
         if ((!isset($matchedRoute['action']) || empty($matchedRoute['action']))
             &&
             (!isset($matchedRoute['controller']) || 
@@ -396,17 +399,28 @@ class Router implements RouterInterface
             $matchedRoute['action'] = '__invoke';
         }
 
-        if (
-            isset($matchedRoute['middlewares']) &&
+        // execute route's middlewares
+        if (isset($matchedRoute['middlewares']) &&
             is_array($matchedRoute['middlewares']) &&
             !empty($matchedRoute['middlewares'])
         ) {
             foreach ($matchedRoute['middlewares'] as $middleware) {
-                $middlewareInstance = new $middleware[0]();
-                $middlewareInstance->{$middleware[1]}();
+                if (is_string($middleware)) {
+                    call_user_func($middleware);
+                } 
+                else if (is_array($middleware) && (count($middleware) == 2)) {
+                    $middlewareInstance = new $middleware[0]();
+                    $middlewareInstance->{$middleware[1]}();
+                }
+                else {
+                    throw new InvalidArgumentException(
+                        "Invalid middlewares for route {$matchedRoute['path']}"
+                    );
+                }
             }
         }
 
+        // execute route's action
         if (
             !isset($matchedRoute['controller']) ||
             empty($matchedRoute['controller'])

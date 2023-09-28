@@ -122,6 +122,25 @@ class RouterTest extends TestCase
                 'method' => 'get',
                 'controller' => ExampleSingleActionController::class,
             ],
+            [
+                'name' => 'test12',
+                'path' => '/test12/regular-function-middleware',
+                'middlewares' => ['custom_middleware'],
+                'action' => 'route_handler_a'
+            ],
+            [
+                'path' => '/test13/route-without-name',
+                'action' => 'route_handler_a'
+            ],
+            [
+                'group' => 'test_group_optional',
+                'routes' => [
+                    [
+                        'path' => '/test14',
+                        'action' => 'route_handler_a'
+                    ],
+                ]
+            ],
         ];
     }
 
@@ -642,5 +661,93 @@ class RouterTest extends TestCase
 
         // assert result
         $this->expectOutputString("Single Action Controller");
+    }
+
+    /**
+     * Test middlewares can be regular functions.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testMiddlewaresCanBeRegularFunctions()
+    {
+        $_SERVER['REQUEST_URI'] = '/test12/regular-function-middleware';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Middleware function.some data"
+        );
+    }
+    
+    /**
+     * Test route can work without name.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouteCanWorkWithoutName()
+    {
+        $_SERVER['REQUEST_URI'] = '/test13/route-without-name';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "some data"
+        );
+    }
+    
+    /**
+     * Test routes group optional items (prefix & middlewares).
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRoutesGroupOptionalItems()
+    {
+        $_SERVER['REQUEST_URI'] = '/test14';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "some data"
+        );
+    }
+
+    /**
+     * Test router will through exception if the group routes are empty.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfTheGroupRoutesAreEmpty()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $routes = array_merge($this->routes, [
+            [
+                'group' => 'test_group_optional',
+            ],
+        ]);  
+        
+        $router = new Router($routes);
     }
 }

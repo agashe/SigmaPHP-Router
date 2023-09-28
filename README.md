@@ -353,9 +353,24 @@ $routes = [
     ],
 ];
 ```
-The router will require only the middleware class name and the name of the method that will be executed.
+In case of class based middlewares , the router will require the middleware class name and the name of the method that will be executed.
 
-Creating the middleware classes completely depending on your application , so in your middleware you could have something similar to :
+In addition the middlewares could be written as regular functions , and in this case we pass an array of functions name :
+
+```
+$routes = [
+    [
+        'name' => 'orders.create',
+        'path' => '/orders',
+        'method' => 'post',
+        'middlewares' => ['is_user_auth', 'check_user_permissions'],
+        'controller' => OrderController::class,
+        'action' => 'create'
+    ],
+];
+```
+
+Creating the middleware classes/functions is completely depending on your application , so in your middleware you could have something similar to :
 
 ```
 <?php
