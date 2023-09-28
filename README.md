@@ -469,6 +469,15 @@ function my_custom_404_handler() {
 
 So now you can add your custom 404 message , page design or redirect the user another route.
 
+And as usual you can instead of using function handler , you can use a class , so you pass class name and the method name :
+
+```
+// set custom 404 (Page Not Found) handler
+$router->setPageNotFoundHandler([
+    MyCustomPageNotFoundHandler::class, 'handle'
+]);
+```
+
 ### URL Generation
 
 In a lot of cases , you will need a way to create an URL for your models , for example a link to show order details , SigmaPHP-Router provides a method called `url` , which accept a route name and parameters array. and generate the URL , let's see an example :

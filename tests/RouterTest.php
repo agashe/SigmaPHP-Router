@@ -9,10 +9,11 @@ use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 
-require('ExampleController.php');
-require('ExampleSingleActionController.php');
-require('ExampleMiddleware.php');
 require('route_handlers.php');
+require('ExampleController.php');
+require('ExampleMiddleware.php');
+require('ExamplePageNotFoundHandler.php');
+require('ExampleSingleActionController.php');
 
 /**
  * Router Test
@@ -749,5 +750,85 @@ class RouterTest extends TestCase
         ]);  
         
         $router = new Router($routes);
+    }
+
+    /**
+     * Test router will through exception if the middlewares are invalid.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfTheMiddlewaresAreInvalid()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $routes = array_merge($this->routes, [
+            [
+                'path' => '/test-invalid-middlewares',
+                'middlewares' => [false],
+                'action' => 'route_handler_a',
+            ],
+        ]);
+
+        $_SERVER['REQUEST_URI'] = '/test-invalid-middlewares';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        $router = new Router($routes);
+
+        // run the router
+        $router->run();
+    }
+
+    /**
+     * Test custom handler for page not found can be a class.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testCustomHandlerForPageNotFoundCanBeAClass()
+    {
+        $_SERVER['REQUEST_URI'] = '/page-not-found';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set custom page not found handler
+        $router->setPageNotFoundHandler([
+            ExamplePageNotFoundHandler::class,
+            'handler'
+        ]);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "PageNotFoundHandler is working."
+        );
+    }
+
+    /**
+     * Test router will through exception if the page not found handler
+     * is invalid.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfInvalidPageNotFoundHandler()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $_SERVER['REQUEST_URI'] = '/page-not-found';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set custom page not found handler
+        $router->setPageNotFoundHandler([null]);
+
+        // run the router
+        $router->run();
     }
 }

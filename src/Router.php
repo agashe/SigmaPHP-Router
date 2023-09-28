@@ -282,7 +282,7 @@ class Router implements RouterInterface
     /**
      * Set page not found handler.
      * 
-     * @param string $handler 
+     * @param string|array $handler 
      * @return void
      */
     public function setPageNotFoundHandler($handler)
@@ -370,7 +370,23 @@ class Router implements RouterInterface
         // handle page not found case
         if (empty($matchedRoute)) {
             if (!empty($this->pageNotFoundHandler)) {
-                call_user_func($this->pageNotFoundHandler);
+                if (is_string($this->pageNotFoundHandler)) {
+                    call_user_func($this->pageNotFoundHandler);
+                } 
+                else if (is_array($this->pageNotFoundHandler) && 
+                    (count($this->pageNotFoundHandler) == 2)
+                ) {
+                    $pageNotFoundHandlerInstance = new 
+                        $this->pageNotFoundHandler[0]();
+                    
+                    $pageNotFoundHandlerInstance->
+                        {$this->pageNotFoundHandler[1]}();
+                }
+                else {
+                    throw new InvalidArgumentException(
+                        "Invalid pageNotFoundHandler"
+                    );
+                }
             } else {
                 $this->defaultPageNotFoundHandler();
             }
