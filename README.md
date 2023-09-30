@@ -119,6 +119,19 @@ $router = new Router(array_merge($webRoutes, $apiRoutes));
 $router->run();
 ```
 
+To define a new route , you simply append an route array to the routes array , a valid route should at least have a path and an action :
+
+```
+$routes = [
+    [
+        'path' => '/users/profile',
+        'action' => 'get_user_profile',
+    ],
+];
+```
+
+The route's name is optional , put it is recommended to give your routes a name , so it becomes easier to work with them , like generating URL using the route's name.
+
 ### Base Path
 
 In case your application exists in sub-folder of your domain for example `http://localhost/my-app` , you can set the root path in the `router` constructor , using the second parameter:
@@ -180,7 +193,7 @@ $routes = [
 ];
 ```
 
-If no HTTP was provided , then the HTP method for the route will be automatically set to GET
+If no HTTP was provided , then the HTP method for the route will be automatically set to GET.
 
 ### Parameters
 Route parameters follow the placeholder style (like Laravel) : 
