@@ -410,7 +410,7 @@ To create a new route group , use the following schema :
 $routes = [
     [
         'group' => 'api',
-        'path' => '/api/v1/',
+        'prefix' => '/api/v1/',
         'middlewares' => [
             [AuthMiddleware::class, 'handler'],
             [UserAccountIsActiveMiddleware::class, 'handler'],
@@ -567,7 +567,7 @@ $routes = [
     ],
     [
         'group' => 'posts',
-        'path' => 'posts/',
+        'prefix' => 'posts/',
         'middlewares' => [
             [AuthMiddleware::class, 'handler'],
             [UserIsActiveMiddleware::class, 'handler'],
