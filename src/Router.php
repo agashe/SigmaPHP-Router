@@ -248,11 +248,22 @@ class Router implements RouterInterface
                 }
             }
 
+            // the following regex pattern simply match the
+            // variables and replace them with simpler pattern
+            // example : /users/{id}/orders/{order_id}
+            // payload : /users/1000/orders/1234567890
+            // result parameters => [1000, 1234567890]
             $pathPrepared = preg_replace(
                 '~^\{[^{}]*|^[^{}]*\}$|\{[^{}]*\}~',
-                '([^\/]*)',
+                '([^\/]+)',
                 $route['path']
             );
+            
+            // also notice this condition is to handle the single
+            // parameter path "/{something}" e.g
+            if (substr($pathPrepared, -1) == '}') {
+                $pathPrepared = str_replace('}', '', $pathPrepared);
+            }
             
             if (
                 preg_match('~^' . $pathPrepared . '$~', $path, $parameters) &&
