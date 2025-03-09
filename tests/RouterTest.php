@@ -329,6 +329,31 @@ class RouterTest extends TestCase
     }
 
     /**
+     * Test router will through exception if root route path is duplicated.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfRootRoutePathIsDuplicated()
+    {
+        $this->expectException(DuplicatedRoutesException::class);
+        
+        // create new router instance
+        $router = new Router([
+            [
+                'name' => 'test_root_optional',
+                'path' => '/{name?}',
+                'action' => 'route_handler_d'
+            ],
+            [
+                'name' => 'test_root',
+                'path' => '/',
+                'action' => 'route_handler_a'
+            ],
+        ]);
+    }
+
+    /**
      * Test router can call actions from controller.
      *
      * @runInSeparateProcess
@@ -707,6 +732,97 @@ class RouterTest extends TestCase
         // assert result
         $this->expectOutputString(
             "some data"
+        );
+    }
+    
+    /**
+     * Test root route.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRootRoute()
+    {
+        $this->expectException(DuplicatedRoutesException::class);
+        
+        // create new router instance
+        $router = new Router([
+            [
+                'name' => 'test_root_optional',
+                'path' => '/{name?}',
+                'action' => 'route_handler_d'
+            ],
+            [
+                'name' => 'test_root',
+                'path' => '/',
+                'action' => 'route_handler_a'
+            ],
+        ]);
+    }
+
+    /**
+     * Test root route with parameters.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRootRouteWithOptionalParameters()
+    {
+        $_SERVER['REQUEST_URI'] = '/ahmed';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router([
+            [
+                'name' => 'test_root_optional',
+                'path' => '/{name?}',
+                'action' => 'route_handler_d'
+            ]
+        ]);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "ahmed"
+        );
+    }
+    
+    /**
+     * Test root route with parameters.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRootRouteWithParameters()
+    {
+        $_SERVER['REQUEST_URI'] = '/omar';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router([
+            [
+                'path' => '/test1',
+                'action' => 'route_handler_a'
+            ],
+            [
+                'name' => 'test_root_param',
+                'path' => '/{name}',
+                'action' => 'route_handler_d'
+            ],
+            [
+                'path' => '/test2',
+                'action' => 'route_handler_a'
+            ]
+        ]);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "omar"
         );
     }
     

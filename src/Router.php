@@ -126,51 +126,37 @@ class Router implements RouterInterface
             }
         }
 
-        // handle optional parameters and check for duplicated routes !!
-        foreach ($routes as $key => $route) {
-            $route['path'] = trim($route['path'], '/');
+        // handle optional parameters
+        $tempRoutes = $routes;
+        foreach ($tempRoutes as $key => $route) {
+            if (strpos($route['path'], '?}') !== false) {
+                // we save 2 copy of the route , both with optional parameter
+                // then we use the flag "optional" to make sure that route won't
+                // be considered as duplicated !
+                $route['path'] = trim($route['path'], '/');
 
-            // check route's name , and if empty use the its array key as name
-            if (!isset($route['name']) || empty($route['name'])) {
-                $route['name'] = $key;
-            }
-
-            // check for duplicated routes
-            if (!isset($route['optional'])) {
-                $similarRouteId = array_search(
-                    $route['path'],
-                    array_column($allRoutes, 'path')
+                // the new route , without the optional parameter
+                $pathPrepared = preg_replace(
+                    '~\{[^{}]*\?\}~',
+                    '',
+                    $route['path']
                 );
-    
-                $similarRouteMethod = false;
-                
-                if (
-                    ($similarRouteId !== false) && (
-                        ((!isset($route['method']) || 
-                            empty($route['method'])) &&
-                        (!isset($routes[$similarRouteId]['method']) || 
-                            empty($routes[$similarRouteId]['method']))) ||
-                        ($routes[$similarRouteId]['method'] == $route['method'])
-                    )
-                ) {
-                    $similarRouteMethod = true;
-                }
-    
-                if ($similarRouteMethod == true) {
-                    throw new DuplicatedRoutesException(
-                        "Route [{$route['path']}] is defined multiple times"
-                    );
-                }
-    
-                if (in_array($route['name'], array_column($allRoutes, 'name')))
-                {
-                    throw new DuplicatedRouteNamesException(
-                        "Route [{$route['name']}] is defined multiple times"
-                    );
-                }            
-            }
 
-            // validate route methods
+                $route['path'] = trim($pathPrepared, '/');
+                $route['optional'] = true;
+                $tempRoutes[] = $route;
+
+                // the old route as it is
+                $tempRoutes[$key]['path'] = trim(
+                    $tempRoutes[$key]['path'], '/');
+                $tempRoutes[$key]['optional'] = true;
+            }
+        }
+
+        $routes = $tempRoutes;
+        
+        // validate route methods
+        foreach ($routes as $key => $route) {
             if (isset($route['method'])) {
                 $route['method'] = trim($route['method'], ',');
 
@@ -189,24 +175,54 @@ class Router implements RouterInterface
                 $route['method'] = ['get'];
             }
 
-            if (strpos($route['path'], '?}') !== false) {
-                // we save 2 copy of the route , one with optional parameter
-                // and one without the parameter , then we use the flag 
-                // "optional" to make sure that route won't be considered as
-                // duplicated !
+            $routes[$key] = $route;
+        }
 
-                $allRoutes[] = $route;
+        // check for duplicated routes' names 
+        $nonOptionalRoutes = array_filter($routes, function ($route) {
+            return !isset($route['optional']);
+        });
 
-                $pathPrepared = preg_replace(
-                    '~\{[^{}]*\?\}~',
-                    '',
-                    $route['path']
-                );
+        $duplicateRouteNames = array_keys(array_filter(
+            array_count_values(array_column($nonOptionalRoutes, 'name')), 
+            function ($count) {
+                return $count > 1;
+            }
+        ));
 
-                $route['path'] = trim($pathPrepared, '/');
-                $route['optional'] = true;
+        if (!empty($duplicateRouteNames)) {
+            throw new DuplicatedRouteNamesException(
+                "Route [{$duplicateRouteNames[0]}] is defined multiple times"
+            );
+        }
+
+        // check for duplicated routes  
+        foreach ($routes as $key => $route) {
+            $route['path'] = trim($route['path'], '/');
+
+            // check route's name , and if empty use its array key as name
+            if (!isset($route['name']) || empty($route['name'])) {
+                $route['name'] = $key;
             }
 
+            foreach ($routes as $k => $v) {
+                $v['path'] = trim($v['path'], '/');
+                
+                if ($k == $key) {
+                    continue;
+                }
+                
+                if ($v['path'] == $route['path'] &&
+                    $v['method'] == $route['method']
+                ) {
+                    $pathStr = $route['path'] ?: '/';
+
+                    throw new DuplicatedRoutesException(
+                        "Route [{$pathStr}] is defined multiple times"
+                    );
+                }
+            }
+            
             $allRoutes[] = $route;
         }
 
