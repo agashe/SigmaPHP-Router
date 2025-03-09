@@ -8,7 +8,7 @@ use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
-
+use function SigmaPHP\Router\Tests\route_handler_a;
 /**
  * Router
  */
@@ -252,8 +252,9 @@ class Router implements RouterInterface
                             "($value)",
                             $route['path']
                         );
-                    } else if (strpos(
-                        $route['path'], '{' . $key . '}') !== false
+                    }
+                    else if (
+                        strpos($route['path'], '{' . $key . '}') !== false
                     ) {
                         $route['path'] = str_replace(
                             '{' . $key . '}',

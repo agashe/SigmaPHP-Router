@@ -15,7 +15,7 @@ A fast and simple router for PHP , you can use for your projects to provide user
 * Middlewares , that can be run before your route
 * Route Groups which support middlewares and prefix
 * URL generation using the route name
-* default page not found (404) handler and you can use your own
+* Default page not found (404) handler and you can define custom handler
 
 ## Installation
 

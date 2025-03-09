@@ -1,19 +1,20 @@
-cs
 <?php 
 
-use PHPUnit\Framework\TestCase;
 use SigmaPHP\Router\Router;
+use PHPUnit\Framework\TestCase;
 use SigmaPHP\Router\Exceptions\RouteNotFoundException;
 use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
+use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
+use SigmaPHP\Router\Tests\Examples\Middleware as ExampleMiddleware;
+use SigmaPHP\Router\Tests\Examples\PageNotFoundHandler
+    as ExamplePageNotFoundHandler;
+use SigmaPHP\Router\Tests\Examples\SingleActionController
+    as ExampleSingleActionController;  
 
 require('route_handlers.php');
-require('ExampleController.php');
-require('ExampleMiddleware.php');
-require('ExamplePageNotFoundHandler.php');
-require('ExampleSingleActionController.php');
 
 /**
  * Router Test

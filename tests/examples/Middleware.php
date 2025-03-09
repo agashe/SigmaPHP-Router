@@ -1,9 +1,11 @@
 <?php
 
+namespace SigmaPHP\Router\Tests\Examples;
+
 /**
  * Example middleware to use in router testing
  */
-class ExampleMiddleware
+class Middleware
 {
     public function handler()
     {

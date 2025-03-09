@@ -1,9 +1,11 @@
 <?php
 
+namespace SigmaPHP\Router\Tests\Examples;
+
 /**
  * Example page not found handler to use in router testing
  */
-class ExamplePageNotFoundHandler
+class PageNotFoundHandler
 {
     public function handler()
     {

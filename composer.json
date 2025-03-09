@@ -9,6 +9,12 @@
             "SigmaPHP\\Router\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "SigmaPHP\\Router\\Tests\\": "tests/",
+            "SigmaPHP\\Router\\Tests\\Examples\\": "tests/examples"
+        }
+    },
     "authors": [
         {
             "name": "Mohamed Yousef",

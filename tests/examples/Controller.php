@@ -1,9 +1,11 @@
 <?php
 
+namespace SigmaPHP\Router\Tests\Examples;
+
 /**
  * Example controller to use in router testing
  */
-class ExampleController
+class Controller
 {
     public function index()
     {
