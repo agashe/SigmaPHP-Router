@@ -3,12 +3,14 @@
 namespace SigmaPHP\Router;
 
 use SigmaPHP\Router\Interfaces\RouterInterface;
+use SigmaPHP\Router\Interfaces\RunnerInterface;
 use SigmaPHP\Router\Exceptions\RouteNotFoundException;
 use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
-use function SigmaPHP\Router\Tests\route_handler_a;
+use SigmaPHP\Router\Runners\DefaultRunner;
+
 /**
  * Router
  */
@@ -28,6 +30,11 @@ class Router implements RouterInterface
      * @var string $pageNotFoundHandler
      */
     private $pageNotFoundHandler;
+    
+    /**
+     * @var RunnerInterface $actionRunner
+     */
+    private $actionRunner;
 
     /**
      * @var array $httpMethods
@@ -53,8 +60,11 @@ class Router implements RouterInterface
         // set base path
         $this->host = $host;
 
-        // set page not found handler to default
+        // set page not found handler to null (to trigger the default handler)
         $this->pageNotFoundHandler = null;
+
+        // set default action runner
+        $this->actionRunner = new DefaultRunner();
 
         // load the routes and process
         $this->routes = $this->load($routes);
@@ -465,20 +475,6 @@ class Router implements RouterInterface
         }
 
         // execute route's action
-        if (
-            !isset($matchedRoute['controller']) ||
-            empty($matchedRoute['controller'])
-        ) {
-            call_user_func(
-                $matchedRoute['action'],
-                ...$matchedRoute['parameters']
-            );
-        } else {
-            $controller = new $matchedRoute['controller']();
-
-            $controller->{$matchedRoute['action']}(
-                ...$matchedRoute['parameters']
-            );
-        }
+        $this->actionRunner->execute($matchedRoute);        
     }
 }
