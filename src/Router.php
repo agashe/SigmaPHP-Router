@@ -327,6 +327,36 @@ class Router implements RouterInterface
     {
         $this->pageNotFoundHandler = $handler;
     }
+    
+    /**
+     * Set actions runner.
+     * 
+     * @param string $runner
+     * @return void
+     */
+    public function setActionRunner($runner)
+    {
+        // the runner should be a valid class , and MUST implement
+        // the runner interface
+        if (!is_string($runner) || empty($runner) || !class_exists($runner)) {
+            throw new InvalidArgumentException(
+                "Invalid runner , actions runner should be a valid class !"
+            );
+        }
+
+        $interfaces = class_implements($runner);
+
+        if (empty($interfaces) ||
+            !in_array(RunnerInterface::class, $interfaces)
+        ) {
+            throw new InvalidArgumentException(
+                "Invalid runner , service runner " . 
+                "MUST implement RunnerInterface!"
+            );
+        }
+        
+        $this->actionRunner = new $runner();
+    }
 
     /**
      * Generate URL from route's name.
@@ -475,6 +505,8 @@ class Router implements RouterInterface
         }
 
         // execute route's action
-        $this->actionRunner->execute($matchedRoute);        
+        $this->actionRunner->execute($matchedRoute);     
+        
+        // ToDo : write small documentation section for runners
     }
 }

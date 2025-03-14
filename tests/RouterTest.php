@@ -9,6 +9,8 @@ use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
 use SigmaPHP\Router\Tests\Examples\Middleware as ExampleMiddleware;
+use SigmaPHP\Router\Tests\Examples\Runner as ExampleRunner;
+use SigmaPHP\Router\Tests\Examples\InvalidRunner as ExampleInvalidRunner;
 use SigmaPHP\Router\Tests\Examples\PageNotFoundHandler
     as ExamplePageNotFoundHandler;
 use SigmaPHP\Router\Tests\Examples\SingleActionController
@@ -944,6 +946,79 @@ class RouterTest extends TestCase
 
         // set custom page not found handler
         $router->setPageNotFoundHandler([null]);
+
+        // run the router
+        $router->run();
+    }
+
+    /**
+     * Test custom actions runner.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testCustomActionsRunner()
+    {
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set custom action runner
+        $router->setActionRunner(ExampleRunner::class);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Log : some data"
+        );
+    }
+
+    /**
+     * Test router will through exception if the actions runner is invalid.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfTheActionsRunnerIsInvalid()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set non-class action runner
+        $router->setActionRunner([null]);
+
+        // run the router
+        $router->run();
+    }
+    
+    /**
+     * Test router will through exception if the actions runner doesn't 
+     * implement the RunnerInterface.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testExceptionIfTheRunnerDoesNotImplementTheRunnerInterface()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set invalid actions runner
+        $router->setActionRunner(ExampleInvalidRunner::class);
 
         // run the router
         $router->run();

@@ -1,27 +1,25 @@
 <?php
 
-namespace SigmaPHP\Router\Runners;
+namespace SigmaPHP\Router\Tests\Examples;
 
 use SigmaPHP\Router\Interfaces\RunnerInterface;
 
 /**
- * Default Runner
+ * Example action runner to use in router testing
  */
-class DefaultRunner implements RunnerInterface
+class Runner implements RunnerInterface
 {
-    /**
-     * Execute the route's action.
-     * 
-     * @param array $route
-     * @return void
-     */
     public function execute($route)
     {
+        // In this custom runner , we add custom log message
+        // before the execution
+        echo 'Log : '; 
+
         if (!isset($route['controller']) || empty($route['controller'])) {
             call_user_func($route['action'],...$route['parameters']);
         } else {
             $controller = new $route['controller']();
             $controller->{$route['action']}(...$route['parameters']);
-        }
+        }  
     }
 }
