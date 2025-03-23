@@ -38,6 +38,18 @@ Then in the `.htaccess` file , change `index.php` to `public/index.php` , and th
 
 ## Documentation
 
+#### Table of Contents  
+* [Basic Setup](#basic-setup)
+* [Base Path](#base-path)
+* [HTTP Methods](#http-methods)
+* [Parameters](#parameters)
+* [Validation](#validation)
+* [Actions](#actions)
+* [Middlewares](#middlewares)
+* [Route Groups](#route-groups)
+* [Page not found handling](#pagenotfoundhandling)
+* [URL Generation](#url-generation)
+
 ### Basic Setup
 In order to start using SigmaPHP-Router in your app , in the main entry point of your app (say for example `index.php` ), you first need define the routes array , then pass that array to the constructor and finally call the the `run()` method.
 

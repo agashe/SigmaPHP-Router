@@ -506,7 +506,5 @@ class Router implements RouterInterface
 
         // execute route's action
         $this->actionRunner->execute($matchedRoute);     
-        
-        // ToDo : write small documentation section for runners
     }
 }
