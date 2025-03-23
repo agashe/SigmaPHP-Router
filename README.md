@@ -16,6 +16,7 @@ A fast and simple router for PHP , you can use for your projects to provide user
 * Route Groups which support middlewares and prefix
 * URL generation using the route name
 * Default page not found (404) handler and you can define custom handler
+* Custom action runners , for advanced customization
 
 ## Installation
 
@@ -47,8 +48,9 @@ Then in the `.htaccess` file , change `index.php` to `public/index.php` , and th
 * [Actions](#actions)
 * [Middlewares](#middlewares)
 * [Route Groups](#route-groups)
-* [Page not found handling](#pagenotfoundhandling)
+* [Page not found handling](#page-not-found-handling)
 * [URL Generation](#url-generation)
+* [Action Runners](#action-runners)
 
 ### Basic Setup
 In order to start using SigmaPHP-Router in your app , in the main entry point of your app (say for example `index.php` ), you first need define the routes array , then pass that array to the constructor and finally call the the `run()` method.
@@ -551,6 +553,114 @@ $pageURL = $router->url('print_terms_of_usage');
 
 ..... if we print $pageURL :
 http://localhost/terms-of-usage
+```
+
+### Action Runners
+
+Action runner is the execution unit inside SigmaPHP-Router , it's the last step in the route execution cycle , starting from matching to applying middlewares and other validations , we finally reach to the execution phase , in this phase the runner will take care of executing the action either by calling the action function or a method defined in class.
+
+But in some cases , writing our custom runner might be a necessity , for example if we want to preform some logic before the execution start , for example add some logs before or after the execution or handle dependency injection.
+
+By default SigmaPHP-Router ships with the `DefaultRunner` , to register your own runner , all what you have to do is to define and new class that implements the `RunnerInterface` :
+
+```
+<?php
+
+namespace SigmaPHP\Router\Interfaces;
+
+/**
+ * Runner Interface
+ */
+interface RunnerInterface
+{
+    /**
+     * Execute the route's action.
+     * 
+     * @param array $route
+     * @return void
+     */
+    public function execute($route);
+}
+```
+A simple interface that only has one method `execute` which only accepts the route as a parameter.
+
+```
+<?php
+
+namespace MyApp\Util;
+
+use SigmaPHP\Router\Interfaces\RunnerInterface;
+
+class MyCustomRunner implements RunnerInterface
+{
+    /**
+     * Execute the route's action.
+     * 
+     * @param array $route
+     * @return void
+     */
+    public function execute($route)
+    {
+        // here we define our execution logic , save logs 
+        // connect to DB , inject dependencies or use call_user_func
+        // to call actions ... etc
+    }
+}
+```
+Please note , that inside the `execute` method we have three main items defined in the route array , that we should use to execute the route :
+
+```
+// first is the controller name and path , which also
+// could be empty if we are just calling standalone actions 
+// example : \MyApp\Controllers\MainController 
+$route['controller'] 
+
+// then the action name , which again could belong to a
+// controller or just a name of a function defined in our app 
+$route['action']
+
+// finally the parameters array , which contains all of the 
+// parameters extracted form the url and this array could be empty
+// if no parameters were provided
+// example : ['user_id' => 5, 'order_id' => 10]
+$route['parameters']
+
+// using these information we could implement our logic like so : 
+call_user_func($route['action'],...$route['parameters']); 
+```
+
+Finally we can register our custom runner using the `setActionRunner` method :
+
+```
+// initialize the router
+$router = new Router($webRoutes);
+
+// set the runner before starting the router
+$router->setActionRunner(MyCustomRunner::class);
+
+// run the router
+$router->run();
+```
+
+And in some cases depending on how complex our project , we can control the runners based some conditions like environment variables ... etc 
+
+```
+// initialize the router
+$router = new Router($webRoutes);
+
+// check the .env and set the runner
+if ($_ENV['environment'] == 'dev') {
+    $router->setActionRunner(DevRunner::class);
+}
+else if ($_ENV['environment'] == 'prod') {
+    $router->setActionRunner(ProdRunner::class);
+}
+else {
+    $router->setActionRunner(DefaultRunner::class);
+}
+
+// run the router
+$router->run();
 ```
 
 ## Examples
