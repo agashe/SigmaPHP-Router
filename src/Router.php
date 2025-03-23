@@ -332,15 +332,17 @@ class Router implements RouterInterface
      * Set actions runner.
      * 
      * @param string $runner
+     * @param array $parameters
      * @return void
      */
-    public function setActionRunner($runner)
+    public function setActionRunner($runner, $parameters = [])
     {
         // the runner should be a valid class , and MUST implement
         // the runner interface
         if (!is_string($runner) || empty($runner) || !class_exists($runner)) {
             throw new InvalidArgumentException(
-                "Invalid runner , actions runner should be a valid class !"
+                "Invalid runner , actions " .
+                "runner should be a valid class !"
             );
         }
 
@@ -350,12 +352,20 @@ class Router implements RouterInterface
             !in_array(RunnerInterface::class, $interfaces)
         ) {
             throw new InvalidArgumentException(
-                "Invalid runner , service runner " . 
-                "MUST implement RunnerInterface!"
+                "Invalid runner [{$runner}] , action runner " . 
+                "MUST implement RunnerInterface !"
+            );
+        }
+
+        // if the parameters are not an array throw exception
+        if (!is_array($parameters)) {
+            throw new InvalidArgumentException(
+                "Invalid parameters for action runner [{$runner}] " .
+                "parameters can only be array !"
             );
         }
         
-        $this->actionRunner = new $runner();
+        $this->actionRunner = new $runner(...$parameters);
     }
 
     /**

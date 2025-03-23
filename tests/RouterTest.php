@@ -10,6 +10,7 @@ use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
 use SigmaPHP\Router\Tests\Examples\Middleware as ExampleMiddleware;
 use SigmaPHP\Router\Tests\Examples\Runner as ExampleRunner;
+use SigmaPHP\Router\Tests\Examples\ParamRunner as ExampleParamRunner;
 use SigmaPHP\Router\Tests\Examples\InvalidRunner as ExampleInvalidRunner;
 use SigmaPHP\Router\Tests\Examples\PageNotFoundHandler
     as ExamplePageNotFoundHandler;
@@ -1019,6 +1020,56 @@ class RouterTest extends TestCase
 
         // set invalid actions runner
         $router->setActionRunner(ExampleInvalidRunner::class);
+
+        // run the router
+        $router->run();
+    }
+
+    /**
+     * Test custom actions runner can accept parameters.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testCustomActionsRunnerCanAcceptParameters()
+    {
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set custom action runner
+        $router->setActionRunner(ExampleParamRunner::class, ['message']);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Log message: some data"
+        );
+    }
+
+    /**
+     * Test router will through exception if the actions runner parameters 
+     * are not of type array.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterThroughExceptionIfRunnerParametersNotArray()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set invalid parameters
+        $router->setActionRunner(ExampleParamRunner::class, 123);
 
         // run the router
         $router->run();

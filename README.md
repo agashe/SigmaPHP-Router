@@ -641,6 +641,19 @@ $router->setActionRunner(MyCustomRunner::class);
 // run the router
 $router->run();
 ```
+The `setActionRunner` method also has one optional parameter
+called `parameters` which of type array and can be used to pass arguments to the runner constructor :
+
+```
+// initialize the router
+$router = new Router($webRoutes);
+
+// pass the parameters array
+$router->setActionRunner(MyCustomRunner::class, [$service]);
+
+// run the router
+$router->run();
+```
 
 And in some cases depending on how complex our project , we can control the runners based some conditions like environment variables ... etc 
 
