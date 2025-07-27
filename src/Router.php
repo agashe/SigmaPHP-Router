@@ -388,7 +388,7 @@ class Router implements RouterInterface
             }
         }
 
-        if (empty($path)) {
+        if (empty($matchedRoute)) {
             throw new RouteNotFoundException(
                 "Route [{$routeName}] is not found"
             );
