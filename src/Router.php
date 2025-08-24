@@ -381,7 +381,7 @@ class Router implements RouterInterface
         $matchedRoute = [];
 
         foreach ($this->routes as $route) {
-            if (($route['name'] == $routeName) && !isset($route['optional'])) {
+            if ($route['name'] == $routeName) {
                 $matchedRoute = $route;
                 $path = $route['path'];
                 break;
