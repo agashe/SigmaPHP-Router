@@ -30,4 +30,13 @@ interface RouterInterface
      * @return void
      */
     public function setPageNotFoundHandler($handler);
+
+    /**
+     * Set actions runner.
+     * 
+     * @param string $runner
+     * @param array $parameters
+     * @return void
+     */
+    public function setActionRunner($runner, $parameters);
 }

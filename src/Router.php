@@ -286,12 +286,10 @@ class Router implements RouterInterface
                 $route['path']
             );
             
-            // also notice this condition is to handle the single
-            // parameter path "/{something}" e.g
-            if (substr($pathPrepared, -1) == '}') {
-                $pathPrepared = str_replace('}', '', $pathPrepared);
-            }
-            
+            // also notice this condition is to handle any additional '}'
+            // that could be found !
+            $pathPrepared = str_replace('}', '', $pathPrepared);
+
             if (
                 preg_match('~^' . $pathPrepared . '$~', $path, $parameters) &&
                 in_array(strtolower($method), $route['method'])
@@ -315,6 +313,30 @@ class Router implements RouterInterface
     {
         http_response_code(404);
         echo "404 , The Requested URL Was Not Found";
+    }
+
+    /**
+     * Handle query parameters.
+     * 
+     * @param string $uri
+     * @return string
+     */
+    private function handleQueryParameters($uri)
+    {
+        if (strpos($uri, '?') === false) {
+            return $uri;
+        }
+        
+        // all before "?" is the original uri , where all after are the params
+        $extractedParts = explode('?', $uri);
+        
+        // process query parameters and save them into $_GET
+        foreach (explode('&', $extractedParts[1]) as $parameter) {
+            $keyVal = explode('=', $parameter);
+            $_GET[$keyVal[0]] = $keyVal[1];
+        }
+
+        return $extractedParts[0];
     }
 
     /**
@@ -425,7 +447,7 @@ class Router implements RouterInterface
             (!empty($this->host) ? '/' . trim($this->host, '/') . '/' : '/') .
             rtrim($path, '/');
     }
-
+    
     /**
      * Run the router.
      * 
@@ -441,6 +463,9 @@ class Router implements RouterInterface
         if (!empty($this->host)) {
             $uri = str_replace($this->host, '', $uri);
         }
+
+        // handle query parameters
+        $uri = $this->handleQueryParameters($uri);
 
         // match the route
         $matchedRoute = $this->match($method, $uri);

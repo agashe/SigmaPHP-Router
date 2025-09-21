@@ -7,15 +7,11 @@ use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
-use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
-use SigmaPHP\Router\Tests\Examples\Middleware as ExampleMiddleware;
 use SigmaPHP\Router\Tests\Examples\Runner as ExampleRunner;
 use SigmaPHP\Router\Tests\Examples\ParamRunner as ExampleParamRunner;
 use SigmaPHP\Router\Tests\Examples\InvalidRunner as ExampleInvalidRunner;
 use SigmaPHP\Router\Tests\Examples\PageNotFoundHandler
     as ExamplePageNotFoundHandler;
-use SigmaPHP\Router\Tests\Examples\SingleActionController
-    as ExampleSingleActionController;  
 
 require('route_handlers.php');
 
@@ -43,110 +39,7 @@ class RouterTest extends TestCase
         parent::setUp();
         
         // define testing routes array
-        $this->routes = [
-            [
-                'name' => 'test1',
-                'path' => '/test1/static',
-                'method' => 'get',
-                'action' => 'route_handler_a',
-            ],
-            [
-                'name' => 'test2',
-                'path' => '/test2/{data}',
-                'method' => 'get',
-                'action' => 'route_handler_b'
-            ],
-            [
-                'name' => 'test3',
-                'path' => '/test3/{data1}/{data2}/test/{data3}',
-                'method' => 'get',
-                'action' => 'route_handler_c'
-            ],
-            [
-                'name' => 'test4',
-                'path' => '/test4/optional/param/{data?}',
-                'method' => 'get',
-                'action' => 'route_handler_d'
-            ],
-            [
-                'name' => 'test5',
-                'path' => '/test5/controller',
-                'method' => 'get',
-                'controller' => ExampleController::class,
-                'action' => 'index'
-            ],
-            [
-                'name' => 'test6',
-                'path' => '/test6/middleware',
-                'method' => 'get',
-                'middlewares' => [
-                    [ExampleMiddleware::class, 'handler'],
-                ],
-                'controller' => ExampleController::class,
-                'action' => 'index'
-            ],
-            [
-                'name' => 'test7',
-                'path' => '/test7/validation/{data}',
-                'method' => 'get',
-                'action' => 'route_handler_d',
-                'validation' => [
-                    'data' => '[0-9]+'
-                ]
-            ],
-            [
-                'name' => 'test8',
-                'path' => '/test8/any-method/{data}',
-                'method' => 'any',
-                'action' => 'route_handler_d',
-            ],
-            [
-                'group' => 'test_group',
-                'prefix' => 'test-group/',
-                'middlewares' => [
-                    [ExampleMiddleware::class, 'handler'],
-                ],
-                'routes' => [
-                    [
-                        'name' => 'test9',
-                        'path' => '/test9',
-                        'method' => 'post',
-                        'controller' => ExampleController::class,
-                        'action' => 'index'
-                    ],
-                ]
-            ],
-            [
-                'name' => 'test10',
-                'path' => '/test10/default-method',
-                'action' => 'route_handler_a'
-            ],
-            [
-                'name' => 'test11',
-                'path' => '/test11/single-action-controller',
-                'method' => 'get',
-                'controller' => ExampleSingleActionController::class,
-            ],
-            [
-                'name' => 'test12',
-                'path' => '/test12/regular-function-middleware',
-                'middlewares' => ['custom_middleware'],
-                'action' => 'route_handler_a'
-            ],
-            [
-                'path' => '/test13/route-without-name',
-                'action' => 'route_handler_a'
-            ],
-            [
-                'group' => 'test_group_optional',
-                'routes' => [
-                    [
-                        'path' => '/test14',
-                        'action' => 'route_handler_a'
-                    ],
-                ]
-            ],
-        ];
+        $this->routes = require('routes.php');
     }
 
     /**
@@ -210,6 +103,27 @@ class RouterTest extends TestCase
 
         // assert result
         $this->expectOutputString("d1 , d2 and d3 were received");
+    }
+    
+    /**
+     * Test router can parse start/end parameters URLs.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanParseStartEndParametersURLs()
+    {
+        $_SERVER['REQUEST_URI'] = '/s1/test15/s2/test/s3';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("s1 , s2 and s3 were received");
     }
 
     /**
@@ -1073,5 +987,30 @@ class RouterTest extends TestCase
 
         // run the router
         $router->run();
+    }
+
+    /**
+     * Test router can handle query parameters.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanHandleQueryParameters()
+    {
+        $_SERVER['REQUEST_URI'] = '/test2/my-data?name=ahmed&age=15';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("my-data was received");
+
+        // check that $_GET has the query parameters
+        $this->assertEquals('ahmed', $_GET['name']);
+        $this->assertEquals('15', $_GET['age']);
     }
 }
