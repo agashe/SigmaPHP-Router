@@ -391,6 +391,18 @@ class Router implements RouterInterface
     }
 
     /**
+     * Get the base URL.
+     * 
+     * @return string
+    */
+    public function getBaseUrl()
+    {
+        return (!empty($_SERVER['HTTPS']) ? 'https://' : 'http://') .
+            $_SERVER['HTTP_HOST'] .
+            (!empty($this->host) ? '/' . trim($this->host, '/') . '/' : '/');
+    }
+
+    /**
      * Generate URL from route's name.
      * 
      * @param string $routeName
@@ -442,10 +454,7 @@ class Router implements RouterInterface
             );
         }
 
-        return (!empty($_SERVER['HTTPS']) ? 'https://' : 'http://') .
-            $_SERVER['HTTP_HOST'] .
-            (!empty($this->host) ? '/' . trim($this->host, '/') . '/' : '/') .
-            rtrim($path, '/');
+        return $this->getBaseUrl() . rtrim($path, '/');
     }
     
     /**

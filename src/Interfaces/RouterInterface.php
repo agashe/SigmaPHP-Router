@@ -39,4 +39,11 @@ interface RouterInterface
      * @return void
      */
     public function setActionRunner($runner, $parameters);
+    
+    /**
+     * Get the base URL.
+     * 
+     * @return string
+    */
+    public function getBaseUrl();
 }

@@ -1103,4 +1103,25 @@ class RouterTest extends TestCase
         $this->assertEquals('ahmed', $_GET['name']);
         $this->assertEquals('15', $_GET['age']);
     }
+
+    /**
+     * Test get base url.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testGetBaseUrl()
+    {
+        $_SERVER['HTTPS'] = null;
+        $_SERVER['HTTP_HOST'] = 'localhost';
+
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // assert result
+        $this->assertEquals(
+            $router->getBaseUrl(),
+            'http://localhost/'
+        );
+    }   
 }
