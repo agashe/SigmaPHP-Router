@@ -6,10 +6,13 @@ use SigmaPHP\Router\Exceptions\RouteNotFoundException;
 use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
+use SigmaPHP\Router\Exceptions\ActionNotFoundException;
+use SigmaPHP\Router\Exceptions\ControllerNotFoundException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 use SigmaPHP\Router\Tests\Examples\Runner as ExampleRunner;
 use SigmaPHP\Router\Tests\Examples\ParamRunner as ExampleParamRunner;
 use SigmaPHP\Router\Tests\Examples\InvalidRunner as ExampleInvalidRunner;
+use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
 use SigmaPHP\Router\Tests\Examples\PageNotFoundHandler
     as ExamplePageNotFoundHandler;
 
@@ -380,6 +383,93 @@ class RouterTest extends TestCase
         $router = new Router($duplicatedRoutes);
 
         $_SERVER['REQUEST_URI'] = '/no-action';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // run the router
+        $router->run();
+    }
+    
+    /**
+     * Test router will through exception if the action is not found.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfTheActionIsNotFound()
+    {
+        $this->expectException(ActionNotFoundException::class);
+
+        $duplicatedRoutes = array_merge($this->routes, [
+            [
+                'name' => 'testActionNotFound',
+                'path' => '/action-not-found-exception',
+                'method' => 'get',
+                'action' => 'not_found',
+            ]
+        ]);  
+        
+        $router = new Router($duplicatedRoutes);
+
+        $_SERVER['REQUEST_URI'] = '/action-not-found-exception';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // run the router
+        $router->run();
+    }
+    
+    /**
+     * Test router will through exception if the controller is not found.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfTheControllerIsNotFound()
+    {
+        $this->expectException(ControllerNotFoundException::class);
+
+        $duplicatedRoutes = array_merge($this->routes, [
+            [
+                'name' => 'testControllerNotFound',
+                'path' => '/controller-not-found-exception',
+                'method' => 'get',
+                'controller' => 'ControllerNotFound',
+                'action' => 'myAction',
+            ]
+        ]);  
+        
+        $router = new Router($duplicatedRoutes);
+
+        $_SERVER['REQUEST_URI'] = '/controller-not-found-exception';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // run the router
+        $router->run();
+    }
+    
+    /**
+     * Test router will through exception if the action is not found in the 
+     * controller.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfActionNotInController()
+    {
+        $this->expectException(ActionNotFoundException::class);
+
+        $duplicatedRoutes = array_merge($this->routes, [
+            [
+                'name' => 'testActionNotFoundInController',
+                'path' => '/action-not-found-in-controller',
+                'method' => 'get',
+                'controller' => ExampleController::class,
+                'action' => 'myAction',
+            ]
+        ]);  
+        
+        $router = new Router($duplicatedRoutes);
+
+        $_SERVER['REQUEST_URI'] = '/action-not-found-in-controller';
         $_SERVER['REQUEST_METHOD'] = 'GET';
 
         // run the router
