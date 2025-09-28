@@ -1,6 +1,7 @@
 <?php
 
 use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
+use SigmaPHP\Router\Tests\Examples\GroupController as ExampleGroupController;
 use SigmaPHP\Router\Tests\Examples\Middleware as ExampleMiddleware;
 use SigmaPHP\Router\Tests\Examples\SingleActionController
     as ExampleSingleActionController;  
@@ -113,5 +114,31 @@ return [
         'path' => '/{data1}/test15/{data2}/test/{data3}',
         'method' => 'get',
         'action' => 'route_handler_c'
+    ],
+    [
+        'group' => 'test_group_controller',
+        'prefix' => 'test-group-controller/',
+        'controller' => ExampleGroupController::class,
+        'routes' => [
+            [
+                'name' => 'test16',
+                'path' => '/test16',
+                'method' => 'get',
+                'action' => 'home'
+            ],
+            [
+                'name' => 'test17',
+                'path' => '/test17',
+                'method' => 'post',
+                'controller' => ExampleController::class,
+                'action' => 'index'
+            ],
+            [
+                'name' => 'test18',
+                'path' => '/test18',
+                'method' => 'get',
+                'action' => 'about'
+            ],
+        ]
     ],
 ];

@@ -1123,5 +1123,93 @@ class RouterTest extends TestCase
             $router->getBaseUrl(),
             'http://localhost/'
         );
-    }   
+    }
+    
+    /**
+     * Test routes group can share controllers.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRoutesGroupCanShareControllers()
+    {
+        $_SERVER['REQUEST_URI'] = '/test-group-controller/test16';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+        
+        $_SERVER['REQUEST_URI'] = '/test-group-controller/test18';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Example GroupController Home Method" .
+            "Example GroupController About Method"
+        );
+    }
+
+    /**
+     * Test routes group controllers can be overwritten by routes.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRoutesGroupControllersCanBeOverwrittenByRoutes()
+    {
+        $_SERVER['REQUEST_URI'] = '/test-group-controller/test17';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Example Controller Index Method"
+        );
+    }
+    
+    /**
+     * Test routes group will through exception if the controller is not found.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRoutesGroupWillThroughExceptionIfControllerIsNotFound()
+    {
+        $this->expectException(ControllerNotFoundException::class);
+
+        $routes = [
+            [
+                'group' => 'test_group_controller_not_found',
+                'prefix' => 'test-group-controller-not-found',
+                'controller' => 'ControllerNotFound',
+                'routes' => [
+                    [
+                        'name' => 'testGroupControllerNotFound',
+                        'path' => '/',
+                        'method' => 'get',
+                        'action' => 'myAction',
+                    ],
+                ]
+            ]
+        ];  
+        
+        $router = new Router($routes);
+
+        $_SERVER['REQUEST_URI'] = '/test-group-controller-not-found';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // run the router
+        $router->run();
+    }
 }

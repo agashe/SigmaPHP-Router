@@ -6,6 +6,7 @@ A fast and simple router for PHP , you can use for your projects to provide user
 
 * Support placeholder parameters e.g `{name}`
 * Use optional parameters with the route
+* Auto parsing for the GET query parameters
 * Support all HTTP methods GET, POST, PUT ... etc
 * Routes can accept multiple HTTP methods
 * Support `any` method , so the route can accept all HTTP methods
@@ -13,7 +14,7 @@ A fast and simple router for PHP , you can use for your projects to provide user
 * Actions can be implemented as regular functions or controller's method
 * Support for Single Action Controllers
 * Middlewares , that can be run before your route
-* Route Groups which support middlewares and prefix
+* Route Groups which support middlewares , controllers and prefix
 * URL generation using the route name
 * Default page not found (404) handler and you can define custom handler
 * Custom action runners , for advanced customization
@@ -177,6 +178,14 @@ $router = new Router($routes, BASE_PATH);
 $router->run();
 ```
 
+Further more the method `getBaseUrl` could be used to get the base URL from the Router , including the HTTP/S , base path and full domain :
+
+```
+print $router->getBaseUrl();
+
+// will print : 'http://localhost/'
+```
+
 ### HTTP Methods
 
 SigmaPHP-Router support all HTTP methods GET, POST, PUT, DELETE ... etc , a single route can support one or more HTTP methods :
@@ -210,6 +219,7 @@ $routes = [
 If no HTTP was provided , then the HTP method for the route will be automatically set to GET.
 
 ### Parameters
+
 Route parameters follow the placeholder style (like Laravel) : 
 
 ```
@@ -253,6 +263,19 @@ and lastly don't forget to handle the optional parameter in your action , by add
 
 public function list($id = null) {
     ...
+}
+```
+In addition to the route parameters , we also have the query parameters , so automatically this will parsed and accessible through the global PHP variable `$_GET` , so assume in the example above you made the following call :
+
+```
+curl http://localhost/products?page=2&per_page=10
+
+// so , later in your ProductController inside the list method , you can access these parameters :
+
+public function list($id = null)
+{
+    echo $_GET['page']; // 2 
+    echo $_GET['per_page']; // 10
 }
 ```
 
@@ -425,6 +448,7 @@ $routes = [
     [
         'group' => 'api',
         'prefix' => '/api/v1/',
+        'controller' => UserApiController::class,
         'middlewares' => [
             [AuthMiddleware::class, 'handler'],
             [UserAccountIsActiveMiddleware::class, 'handler'],
@@ -437,7 +461,6 @@ $routes = [
                 'middlewares' => [
                     [CheckIfUserCanEditProfileMiddleware::class, 'handler'],
                 ],
-                'controller' => UserApiController::class,
                 'action' => 'profile'
             ],
         ]
@@ -447,11 +470,11 @@ $routes = [
 
 The only items required for a group is the group name and the routes array. The name will be added to all of its routes , so in the example above , the final route name will be : `api.users.profile` and the route path : `/api/v1/users/profile`
 
-Both `prefix` and `middlewares` are optional , a routes group could either has prefix , middlewares , both or non of them.
+`prefix` , `controller` and `middlewares` are all optional , a routes group could either has prefix controller , middlewares , all or non of them.
 
-For the routes definition , nothing changed all features are implemented as regular routes.
+For the routes definition , nothing changed all features are implemented as regular routes. The only thing wroth mention , is that we can override the `controller` option in the group , by specifying teh controller in the route.
 
-*Please Note : SigmaPHP-Router doesn't support sub-groups so you can't define a routes group inside another routes group !*
+*Please Note : SigmaPHP-Router doesn't support sub-groups yet , so you can't define a routes group inside another routes group !*
 
 ### Page not found handling 
 

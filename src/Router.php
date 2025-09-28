@@ -9,6 +9,7 @@ use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
+use SigmaPHP\Router\Exceptions\ControllerNotFoundException;
 use SigmaPHP\Router\Runners\DefaultRunner;
 
 /**
@@ -130,6 +131,23 @@ class Router implements RouterInterface
                         '.' . $route['name'];
                 } else {
                     $route['name'] = $routeGroup['group'] . '.' . $key;
+                }
+
+                // add controller to the group routes , if was provided and the
+                // route doesn't already have a controller defined
+                if (isset($routeGroup['controller']) && 
+                    !empty($routeGroup['controller']) &&
+                    !isset($route['controller']) &&
+                    empty($route['controller'])
+                ) {
+                    if (!class_exists($routeGroup['controller'])) {
+                        throw new ControllerNotFoundException("
+                            The controller {$routeGroup['controller']} is not 
+                            found
+                        ");
+                    }
+
+                    $route['controller'] = $routeGroup['controller'];
                 }
 
                 $routes[] = $route;
