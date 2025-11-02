@@ -1212,4 +1212,55 @@ class RouterTest extends TestCase
         // run the router
         $router->run();
     }
+
+    /**
+     * Test router override HTTP methods.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterOverrideHttpMethods()
+    {
+        $_SERVER['REQUEST_URI'] = '/test19/http_method_override';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $_POST['_method'] = 'PUT';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // enable HTTP method override
+        $router->enableHttpMethodOverride();
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("some data");
+    }
+
+    /**
+     * Test router will throw exception if the provided method is invalid for 
+     * HTTP method override.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterThrowExceptionIfMethodIsInvalidForMethodOverride()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $router = new Router($this->routes);
+
+        $_SERVER['REQUEST_URI'] = '/test19/http_method_override';
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $_POST['_method'] = 'WEIRD';
+
+        // enable HTTP method override
+        $router->enableHttpMethodOverride();
+        
+        // run the router
+        $router->run();
+    }
 }

@@ -38,6 +38,11 @@ class Router implements RouterInterface
     private $actionRunner;
 
     /**
+     * @var bool $httpMethodOverride
+     */
+    private $httpMethodOverride;
+
+    /**
      * @var array $httpMethods
      */
     private $httpMethods = [
@@ -69,6 +74,9 @@ class Router implements RouterInterface
 
         // load the routes and process
         $this->routes = $this->load($routes);
+
+        // set default HTTP method override status
+        $this->httpMethodOverride = false;
     }
 
     /**
@@ -421,6 +429,19 @@ class Router implements RouterInterface
     }
 
     /**
+     * Enable HTTP method override.
+     * 
+     * This only works for POST requests through HTML forms
+     * by adding the _method hidden input field.
+     * 
+     * @return void
+    */
+    public function enableHttpMethodOverride()
+    {
+        $this->httpMethodOverride = true;
+    }
+
+    /**
      * Generate URL from route's name.
      * 
      * @param string $routeName
@@ -493,6 +514,21 @@ class Router implements RouterInterface
 
         // handle query parameters
         $uri = $this->handleQueryParameters($uri);
+
+        // handle http method override , only for POST requests
+        // while _method is set
+        if ($this->httpMethodOverride) {
+            if (strtolower($method) == 'post' && isset($_POST['_method'])) {
+                if (!in_array(strtolower($_POST['_method']), $this->httpMethods)
+                ) {
+                    throw new InvalidArgumentException(
+                        "Invalid HTTP method {$_POST['_method']} !"
+                    );
+                }
+
+                $method = $_POST['_method'];
+            }
+        }
 
         // match the route
         $matchedRoute = $this->match($method, $uri);

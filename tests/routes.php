@@ -141,4 +141,10 @@ return [
             ],
         ]
     ],
+    [
+        'name' => 'test19',
+        'path' => '/test19/http_method_override',
+        'method' => 'put',
+        'action' => 'route_handler_a',
+    ],
 ];

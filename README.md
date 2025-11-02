@@ -18,6 +18,7 @@ A fast and simple router for PHP , you can use for your projects to provide user
 * URL generation using the route name
 * Default page not found (404) handler and you can define custom handler
 * Custom action runners , for advanced customization
+* HTTP method override
 
 ## Installation
 
@@ -697,6 +698,47 @@ else {
 
 // run the router
 $router->run();
+```
+
+### HTTP Method Override
+
+One of the limitations in HTML forms that only GET and POST methods are supported , so if we have a some routes in our application that implements other methods like PUT and DELETE , it will become nearly impossible to use these in HTML forms unless we add POST to the array of allowed methods for each route.
+
+One popular solution for this problem is the HTTP Method Override , this is a mechanism which could be applied to GET and POST requests to change the HTTP method to the desired one.
+
+Several implementations is out there like using `X-HTTP-Method-Override` header , or passing `_method` as a query parameter. Among these implementations the one that SigmaPHP-Router is using , is the `_method` hidden field. This basically only targets the HTML forms with POST method , where the developer will add an hidden input field with name `_method` and the desired HTTP method as value.
+
+By default this feature is disabled. To enable this feature , all what you have to do , is just to call the `enableHttpMethodOverride()` method before starting the router.
+ 
+
+```
+// initialize the router
+$router = new Router([
+    [
+        'name' => 'updateProduct',
+        'path' => '/products',
+        'method' => 'put',
+        'controller' => ProductController::class,
+        'action' => 'update',
+    ]
+]);
+
+// enable HTTP method override
+$router->enableHttpMethodOverride();
+
+// run the router
+$router->run();
+```
+Finally in your HTML form :
+
+```
+<form action="/products" method="POST">
+    <input type="hidden" name="_method" value="PUT" />
+    
+    ... other fields
+
+    <button type="submit">Save</button>
+</form>
 ```
 
 ## Examples

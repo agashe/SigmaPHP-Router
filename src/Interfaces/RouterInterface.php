@@ -46,4 +46,14 @@ interface RouterInterface
      * @return string
     */
     public function getBaseUrl();
+    
+    /**
+     * Enable HTTP method override.
+     * 
+     * This only works for POST requests through HTML forms
+     * by adding the _method hidden input field.
+     * 
+     * @return void
+    */
+    public function enableHttpMethodOverride();
 }
