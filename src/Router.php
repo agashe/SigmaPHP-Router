@@ -527,6 +527,7 @@ class Router implements RouterInterface
                 }
 
                 $method = $_POST['_method'];
+                $_SERVER['REQUEST_METHOD'] = strtoupper($method);
             }
         }
 
