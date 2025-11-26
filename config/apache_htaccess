@@ -1,5 +1,10 @@
-RewriteEngine On
+<IfModule mod_rewrite.c>
+    RewriteEngine On
 
-RewriteCond %{REQUEST_FILENAME}  -f [OR]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ /var/www/html/my-app-dir/index.php [L,QSA]
+    # If the request is for an existing file or directory, serve it directly
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Front Controller: route everything to index.php
+    RewriteRule ^ index.php [L]
+</IfModule>
