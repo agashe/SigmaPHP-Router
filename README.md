@@ -28,7 +28,7 @@ composer require agashe/sigmaphp-router
 
 ## Configurations
 
-Depending on your server , you will need to use one of the provided server configs , including with the router config files for 4 types of servers : Apache , Nginx , Lighttpd and IIS.
+Depending on your server environment, you’ll need to use one of the provided configuration files. These files include example setups for several popular web servers, including Apache, Nginx, Lighttpd, IIS, and Caddy.
 
 To use the router with any of these servers , just copy the corresponding config file from the `configs` folder to the root folder of your project.
 
