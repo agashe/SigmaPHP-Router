@@ -63,8 +63,8 @@ class Router implements RouterInterface
             throw new InvalidArgumentException('Routes can\'t be empty');
         }
 
-        // set base path
-        $this->host = $host;
+        // set base path if provided , otherwise load detect it automatically
+        $this->host = ($host == null) ? $this->detectBasePath() : $host;
 
         // set page not found handler to null (to trigger the default handler)
         $this->pageNotFoundHandler = null;
@@ -363,6 +363,21 @@ class Router implements RouterInterface
         }
 
         return $extractedParts[0];
+    }
+
+    /**
+     * Get the base path of the server.
+     * 
+     * This is extremely important if you're running your app from Apache or 
+     * Nginx servers directly , without the PHP built in server.
+     * 
+     * @return string
+     */
+    private function detectBasePath()
+    {
+        // we exclude the script name from (SCRIPT_NAME) and whatever remaining
+        // that's our base path !
+        return preg_replace('~\/[^\/]+\.php~', '', $_SERVER['SCRIPT_NAME']);
     }
 
     /**

@@ -43,6 +43,9 @@ class RouterTest extends TestCase
         
         // define testing routes array
         $this->routes = require('routes.php');
+
+        // set SCRIPT_NAME for all test cases
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
     }
 
     /**
