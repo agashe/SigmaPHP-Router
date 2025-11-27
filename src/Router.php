@@ -440,7 +440,7 @@ class Router implements RouterInterface
     {
         return (!empty($_SERVER['HTTPS']) ? 'https://' : 'http://') .
             $_SERVER['HTTP_HOST'] .
-            (!empty($this->host) ? '/' . trim($this->host, '/') . '/' : '/');
+            (!empty($this->host) ? '/' . trim($this->host, '/') : '');
     }
 
     /**
@@ -508,7 +508,7 @@ class Router implements RouterInterface
             );
         }
 
-        return $this->getBaseUrl() . rtrim($path, '/');
+        return $this->getBaseUrl() . '/' . rtrim($path, '/');
     }
     
     /**

@@ -1124,7 +1124,7 @@ class RouterTest extends TestCase
         // assert result
         $this->assertEquals(
             $router->getBaseUrl(),
-            'http://localhost/'
+            'http://localhost'
         );
     }
     
