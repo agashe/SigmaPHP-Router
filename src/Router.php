@@ -316,13 +316,16 @@ class Router implements RouterInterface
             // that could be found !
             $pathPrepared = str_replace('}', '', $pathPrepared);
 
-            if (
-                preg_match('~^' . $pathPrepared . '$~', $path, $parameters) &&
-                in_array(strtolower($method), $route['method'])
+            // Please Note: we also add the special HTTP Methods HEAD , TRACE , 
+            // CONNECT, OPTIONS. So the special responses could be handled by
+            // the router for eah of these methods
+            if (preg_match('~^' . $pathPrepared . '$~', $path, $parameters) && 
+                in_array(strtolower($method), array_merge($route['method'],
+                    ['head' , 'trace' , 'connect', 'options']))
             ) {
                 unset($parameters[0]);
                 $parameters = array_values($parameters);
-
+                
                 return $route + ['parameters' => $parameters];
             }
         }
@@ -549,6 +552,37 @@ class Router implements RouterInterface
         // match the route
         $matchedRoute = $this->match($method, $uri);
 
+        // handle the special HTTP Methods case:
+        // HEAD , TRACE , CONNECT, OPTIONS
+        // for more info about this part , please check:
+        // https://www.rfc-editor.org/rfc/rfc9110.html#name-methods
+        switch (strtolower($method)) {
+            case 'head':
+                ob_start();
+                break;
+            case 'trace':
+            case 'connect':
+                http_response_code(405);
+                echo "405 , The HTTP method you requested is not allowed\n";
+
+                return;
+            case 'options':
+                if (!in_array('options', $matchedRoute['method'])) {
+                    echo "405 , The HTTP method you requested is not allowed\n";
+                }
+
+                echo "The allowed HTTP methods are : " . 
+                    strtoupper(implode(',', $matchedRoute['method'])) . PHP_EOL;
+
+                // send the allowed methods for the URI
+                header(
+                    "Allow: " . 
+                    strtoupper(implode(',', $matchedRoute['method']))
+                );
+
+                return;
+        }
+
         // handle page not found case
         if (empty($matchedRoute)) {
             if (!empty($this->pageNotFoundHandler)) {
@@ -620,5 +654,10 @@ class Router implements RouterInterface
 
         // execute route's action
         $this->actionRunner->execute($matchedRoute);     
+
+        // handle the HEAD HTTP method 
+        if (strtolower($method) == 'head') {
+            ob_end_clean();
+        }
     }
 }

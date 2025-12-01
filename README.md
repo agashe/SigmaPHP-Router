@@ -221,9 +221,13 @@ $routes = [
 
 If no HTTP was provided , then the HTP method for the route will be automatically set to GET.
 
+**Please note:** SigmaPHP-Router does not support the TRACE or CONNECT HTTP methods out of the box, as these are considered insecure. Any request using these methods will receive a 405 Method Not Allowed response.<br>
+For HEAD requests, the router returns the same response as GET, including all headers, but without the response body.<br>
+Finally, for OPTIONS requests, the response will include the list of HTTP methods allowed for the requested endpoint.
+
 ### Parameters
 
-Route parameters follow the placeholder style (like Laravel) : 
+Route parameters follow the curly brackets style : 
 
 ```
 $routes = [

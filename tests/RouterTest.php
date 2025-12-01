@@ -1266,4 +1266,95 @@ class RouterTest extends TestCase
         // run the router
         $router->run();
     }
+
+    /**
+     * Test HEAD HTTP method response.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testHeadHttpMethodResponse()
+    {
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'HEAD';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("");
+    }
+    
+    /**
+     * Test OPTIONS HTTP method response.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testOptionsHttpMethodResponse()
+    {
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "405 , The HTTP method you requested is not allowed\n" .
+            "The allowed HTTP methods are : GET\n"
+        );
+    }
+    
+    /**
+     * Test TRACE HTTP method response.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testTraceHttpMethodResponse()
+    {
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'TRACE';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "405 , The HTTP method you requested is not allowed\n"
+        );
+    }
+    
+    /**
+     * Test CONNECT HTTP method response.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testConnectHttpMethodResponse()
+    {
+        $_SERVER['REQUEST_URI'] = '/test1/static';
+        $_SERVER['REQUEST_METHOD'] = 'CONNECT';
+        
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "405 , The HTTP method you requested is not allowed\n"
+        );
+    }
 }
