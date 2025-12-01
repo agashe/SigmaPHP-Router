@@ -66,13 +66,16 @@ require 'vendor/autoload.php';
 
 use SigmaPHP\Router\Router;
 
+function sayHello() {
+    echo "Hello World\n";
+}
+
 $routes = [
     [
-        'name' => 'users.profile',
-        'path' => '/users/profile',
+        'name' => 'greeting',
+        'path' => '/hello',
         'method' => 'get',
-        'controller' => UserController::class,
-        'action' => 'profile',
+        'action' => 'sayHello',
     ],
 ];
 
