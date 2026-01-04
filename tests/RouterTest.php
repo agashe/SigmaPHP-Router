@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 use SigmaPHP\Router\Router;
 use PHPUnit\Framework\TestCase;
@@ -20,8 +20,8 @@ require('route_handlers.php');
 
 /**
  * Router Test
- * 
- * Please Note : through this test unit you find a lot of 
+ *
+ * Please Note : through this test unit you find a lot of
  * altering for $_SERVER values , for sake of simplicity
  * we use this cheap trick to test the router :D
  */
@@ -40,7 +40,7 @@ class RouterTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        
+
         // define testing routes array
         $this->routes = require('routes.php');
 
@@ -58,7 +58,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -79,7 +79,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test2/data';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -100,7 +100,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test3/d1/d2/test/d3';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -110,7 +110,7 @@ class RouterTest extends TestCase
         // assert result
         $this->expectOutputString("d1 , d2 and d3 were received");
     }
-    
+
     /**
      * Test router can parse start/end parameters URLs.
      *
@@ -121,7 +121,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/s1/test15/s2/test/s3';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -142,7 +142,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test4/optional/param/data';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -152,7 +152,7 @@ class RouterTest extends TestCase
         // assert result
         $this->expectOutputString("data");
     }
-    
+
     /**
      * Test router can parse omitted optional parameter.
      *
@@ -163,7 +163,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test4/optional/param';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -183,7 +183,7 @@ class RouterTest extends TestCase
     public function testRouterWillThroughExceptionIfNoRoutesWereProvided()
     {
         $this->expectException(InvalidArgumentException::class);
-        
+
         $router = new Router([]);
     }
 
@@ -197,7 +197,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = 'my_host/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes, 'my_host');
 
@@ -217,7 +217,7 @@ class RouterTest extends TestCase
     public function testRouterWillThroughExceptionIfRouteNamesAreDuplicated()
     {
         $this->expectException(DuplicatedRouteNamesException::class);
-        
+
         $duplicatedRoutes = array_merge($this->routes, [
             [
                 'name' => 'test1',
@@ -247,8 +247,8 @@ class RouterTest extends TestCase
                 'method' => 'get',
                 'action' => 'route_handler_a',
             ]
-        ]);  
-        
+        ]);
+
         $router = new Router($duplicatedRoutes);
     }
 
@@ -261,7 +261,7 @@ class RouterTest extends TestCase
     public function testRouterWillThroughExceptionIfRootRoutePathIsDuplicated()
     {
         $this->expectException(DuplicatedRoutesException::class);
-        
+
         // create new router instance
         $router = new Router([
             [
@@ -287,7 +287,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test5/controller';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -297,7 +297,7 @@ class RouterTest extends TestCase
         // assert result
         $this->expectOutputString("Example Controller Index Method");
     }
-    
+
     /**
      * Test router run middlewares before action execution.
      *
@@ -308,7 +308,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test6/middleware';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -331,7 +331,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test7/validation/wrong';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -354,7 +354,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test8/any-method/data';
         $_SERVER['REQUEST_METHOD'] = 'PUT';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -381,8 +381,8 @@ class RouterTest extends TestCase
                 'path' => '/no-action',
                 'method' => 'get',
             ]
-        ]);  
-        
+        ]);
+
         $router = new Router($duplicatedRoutes);
 
         $_SERVER['REQUEST_URI'] = '/no-action';
@@ -391,7 +391,7 @@ class RouterTest extends TestCase
         // run the router
         $router->run();
     }
-    
+
     /**
      * Test router will through exception if the action is not found.
      *
@@ -409,8 +409,8 @@ class RouterTest extends TestCase
                 'method' => 'get',
                 'action' => 'not_found',
             ]
-        ]);  
-        
+        ]);
+
         $router = new Router($duplicatedRoutes);
 
         $_SERVER['REQUEST_URI'] = '/action-not-found-exception';
@@ -419,7 +419,7 @@ class RouterTest extends TestCase
         // run the router
         $router->run();
     }
-    
+
     /**
      * Test router will through exception if the controller is not found.
      *
@@ -438,8 +438,8 @@ class RouterTest extends TestCase
                 'controller' => 'ControllerNotFound',
                 'action' => 'myAction',
             ]
-        ]);  
-        
+        ]);
+
         $router = new Router($duplicatedRoutes);
 
         $_SERVER['REQUEST_URI'] = '/controller-not-found-exception';
@@ -448,9 +448,9 @@ class RouterTest extends TestCase
         // run the router
         $router->run();
     }
-    
+
     /**
-     * Test router will through exception if the action is not found in the 
+     * Test router will through exception if the action is not found in the
      * controller.
      *
      * @runInSeparateProcess
@@ -468,8 +468,8 @@ class RouterTest extends TestCase
                 'controller' => ExampleController::class,
                 'action' => 'myAction',
             ]
-        ]);  
-        
+        ]);
+
         $router = new Router($duplicatedRoutes);
 
         $_SERVER['REQUEST_URI'] = '/action-not-found-in-controller';
@@ -489,7 +489,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/page-not-found';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -512,7 +512,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/page-not-found';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -538,7 +538,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test-group/test9';
         $_SERVER['REQUEST_METHOD'] = 'POST';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -573,7 +573,7 @@ class RouterTest extends TestCase
     }
 
     /**
-     * Test router will through exception if route name doesn't exist for url 
+     * Test router will through exception if route name doesn't exist for url
      * generation.
      *
      * @runInSeparateProcess
@@ -652,8 +652,8 @@ class RouterTest extends TestCase
                 'method' => 'my-custom-method',
                 'action' => 'route_handler_a',
             ]
-        ]);  
-        
+        ]);
+
         $router = new Router($routes);
     }
 
@@ -667,7 +667,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test10/default-method';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -689,7 +689,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test11/single-action-controller';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -710,7 +710,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test12/regular-function-middleware';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -722,7 +722,7 @@ class RouterTest extends TestCase
             "Middleware function.some data"
         );
     }
-    
+
     /**
      * Test route can work without name.
      *
@@ -733,7 +733,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test13/route-without-name';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -745,7 +745,7 @@ class RouterTest extends TestCase
             "some data"
         );
     }
-    
+
     /**
      * Test root route.
      *
@@ -755,7 +755,7 @@ class RouterTest extends TestCase
     public function testRootRoute()
     {
         $this->expectException(DuplicatedRoutesException::class);
-        
+
         // create new router instance
         $router = new Router([
             [
@@ -781,7 +781,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/ahmed';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router([
             [
@@ -799,7 +799,7 @@ class RouterTest extends TestCase
             "ahmed"
         );
     }
-    
+
     /**
      * Test root route with parameters.
      *
@@ -810,7 +810,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/omar';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router([
             [
@@ -836,7 +836,7 @@ class RouterTest extends TestCase
             "omar"
         );
     }
-    
+
     /**
      * Test routes group optional items (prefix & middlewares).
      *
@@ -847,7 +847,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test14';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -874,8 +874,8 @@ class RouterTest extends TestCase
             [
                 'group' => 'test_group_optional',
             ],
-        ]);  
-        
+        ]);
+
         $router = new Router($routes);
     }
 
@@ -899,7 +899,7 @@ class RouterTest extends TestCase
 
         $_SERVER['REQUEST_URI'] = '/test-invalid-middlewares';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         $router = new Router($routes);
 
         // run the router
@@ -916,7 +916,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/page-not-found';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -948,7 +948,7 @@ class RouterTest extends TestCase
 
         $_SERVER['REQUEST_URI'] = '/page-not-found';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -969,7 +969,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -997,7 +997,7 @@ class RouterTest extends TestCase
 
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1007,9 +1007,9 @@ class RouterTest extends TestCase
         // run the router
         $router->run();
     }
-    
+
     /**
-     * Test router will through exception if the actions runner doesn't 
+     * Test router will through exception if the actions runner doesn't
      * implement the RunnerInterface.
      *
      * @runInSeparateProcess
@@ -1021,7 +1021,7 @@ class RouterTest extends TestCase
 
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1042,7 +1042,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1059,7 +1059,7 @@ class RouterTest extends TestCase
     }
 
     /**
-     * Test router will through exception if the actions runner parameters 
+     * Test router will through exception if the actions runner parameters
      * are not of type array.
      *
      * @runInSeparateProcess
@@ -1071,7 +1071,7 @@ class RouterTest extends TestCase
 
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1092,7 +1092,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test2/my-data?name=ahmed&age=15';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1127,7 +1127,7 @@ class RouterTest extends TestCase
             'http://localhost'
         );
     }
-    
+
     /**
      * Test routes group can share controllers.
      *
@@ -1138,16 +1138,16 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test-group-controller/test16';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
         // run the router
         $router->run();
-        
+
         $_SERVER['REQUEST_URI'] = '/test-group-controller/test18';
         $_SERVER['REQUEST_METHOD'] = 'GET';
-        
+
         // run the router
         $router->run();
 
@@ -1168,7 +1168,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test-group-controller/test17';
         $_SERVER['REQUEST_METHOD'] = 'POST';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1180,7 +1180,7 @@ class RouterTest extends TestCase
             "Example Controller Index Method"
         );
     }
-    
+
     /**
      * Test routes group will through exception if the controller is not found.
      *
@@ -1205,8 +1205,8 @@ class RouterTest extends TestCase
                     ],
                 ]
             ]
-        ];  
-        
+        ];
+
         $router = new Router($routes);
 
         $_SERVER['REQUEST_URI'] = '/test-group-controller-not-found';
@@ -1228,7 +1228,7 @@ class RouterTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'POST';
 
         $_POST['_method'] = 'PUT';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1243,7 +1243,7 @@ class RouterTest extends TestCase
     }
 
     /**
-     * Test router will throw exception if the provided method is invalid for 
+     * Test router will throw exception if the provided method is invalid for
      * HTTP method override.
      *
      * @runInSeparateProcess
@@ -1262,7 +1262,7 @@ class RouterTest extends TestCase
 
         // enable HTTP method override
         $router->enableHttpMethodOverride();
-        
+
         // run the router
         $router->run();
     }
@@ -1277,7 +1277,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'HEAD';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1287,7 +1287,7 @@ class RouterTest extends TestCase
         // assert result
         $this->expectOutputString("");
     }
-    
+
     /**
      * Test OPTIONS HTTP method response.
      *
@@ -1298,7 +1298,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1311,7 +1311,7 @@ class RouterTest extends TestCase
             "The allowed HTTP methods are : GET\n"
         );
     }
-    
+
     /**
      * Test TRACE HTTP method response.
      *
@@ -1322,7 +1322,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'TRACE';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1334,7 +1334,7 @@ class RouterTest extends TestCase
             "405 , The HTTP method you requested is not allowed\n"
         );
     }
-    
+
     /**
      * Test CONNECT HTTP method response.
      *
@@ -1345,7 +1345,7 @@ class RouterTest extends TestCase
     {
         $_SERVER['REQUEST_URI'] = '/test1/static';
         $_SERVER['REQUEST_METHOD'] = 'CONNECT';
-        
+
         // create new router instance
         $router = new Router($this->routes);
 
@@ -1356,5 +1356,28 @@ class RouterTest extends TestCase
         $this->expectOutputString(
             "405 , The HTTP method you requested is not allowed\n"
         );
+    }
+
+    /**
+     * Test router can decode special characters in URL parameters.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanDecodeSpecialCharactersInUrlParameters()
+    {
+        $_SERVER['REQUEST_URI'] =
+            '/test20/special_chars/!@$%^&*()_+~%60;%22,.%3C%3E';
+
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString('!@$%^&*()_ ~`;",.<>');
     }
 }

@@ -31,7 +31,7 @@ class Router implements RouterInterface
      * @var string $pageNotFoundHandler
      */
     private $pageNotFoundHandler;
-    
+
     /**
      * @var RunnerInterface $actionRunner
      */
@@ -53,7 +53,7 @@ class Router implements RouterInterface
 
     /**
      * Router Constructor
-     * 
+     *
      * @param array $routes
      * @param string $host
      */
@@ -81,7 +81,7 @@ class Router implements RouterInterface
 
     /**
      * Process routes.
-     * 
+     *
      * @param array $routes
      * @return array
      */
@@ -89,7 +89,7 @@ class Router implements RouterInterface
     {
         // we start by filtering all routes , and separate the route groups
         // then we combine them later to the routes array , after that
-        // we can process the whole routes array    
+        // we can process the whole routes array
         $allRoutes = [];
 
         $routeGroups = array_filter($routes, function ($route) {
@@ -111,7 +111,7 @@ class Router implements RouterInterface
                 $route['path'] = trim($route['path'], '/');
 
                 // add middlewares to the group routes , if was provided
-                if (isset($routeGroup['middlewares']) && 
+                if (isset($routeGroup['middlewares']) &&
                     !empty($routeGroup['middlewares'])
                 ) {
 
@@ -123,11 +123,11 @@ class Router implements RouterInterface
                 }
 
                 // add prefix to the group routes , if was provided
-                if (isset($routeGroup['prefix']) && 
+                if (isset($routeGroup['prefix']) &&
                     !empty($routeGroup['prefix'])
                 ) {
                     $routeGroup['prefix'] = trim($routeGroup['prefix'], '/');
-                    $route['path'] = $routeGroup['prefix'] . 
+                    $route['path'] = $routeGroup['prefix'] .
                         '/' . $route['path'];
                 }
 
@@ -143,14 +143,14 @@ class Router implements RouterInterface
 
                 // add controller to the group routes , if was provided and the
                 // route doesn't already have a controller defined
-                if (isset($routeGroup['controller']) && 
+                if (isset($routeGroup['controller']) &&
                     !empty($routeGroup['controller']) &&
                     !isset($route['controller']) &&
                     empty($route['controller'])
                 ) {
                     if (!class_exists($routeGroup['controller'])) {
                         throw new ControllerNotFoundException("
-                            The controller {$routeGroup['controller']} is not 
+                            The controller {$routeGroup['controller']} is not
                             found
                         ");
                     }
@@ -190,7 +190,7 @@ class Router implements RouterInterface
         }
 
         $routes = $tempRoutes;
-        
+
         // validate route methods
         foreach ($routes as $key => $route) {
             if (isset($route['method'])) {
@@ -214,13 +214,13 @@ class Router implements RouterInterface
             $routes[$key] = $route;
         }
 
-        // check for duplicated routes' names 
+        // check for duplicated routes' names
         $nonOptionalRoutes = array_filter($routes, function ($route) {
             return !isset($route['optional']);
         });
 
         $duplicateRouteNames = array_keys(array_filter(
-            array_count_values(array_column($nonOptionalRoutes, 'name')), 
+            array_count_values(array_column($nonOptionalRoutes, 'name')),
             function ($count) {
                 return $count > 1;
             }
@@ -232,7 +232,7 @@ class Router implements RouterInterface
             );
         }
 
-        // check for duplicated routes  
+        // check for duplicated routes
         foreach ($routes as $key => $route) {
             $route['path'] = trim($route['path'], '/');
 
@@ -243,11 +243,11 @@ class Router implements RouterInterface
 
             foreach ($routes as $k => $v) {
                 $v['path'] = trim($v['path'], '/');
-                
+
                 if ($k == $key) {
                     continue;
                 }
-                
+
                 if ($v['path'] == $route['path'] &&
                     $v['method'] == $route['method']
                 ) {
@@ -258,7 +258,7 @@ class Router implements RouterInterface
                     );
                 }
             }
-            
+
             $allRoutes[] = $route;
         }
 
@@ -267,7 +267,7 @@ class Router implements RouterInterface
 
     /**
      * Check if route exists.
-     * 
+     *
      * @param string $method
      * @param string $path
      * @return array
@@ -311,21 +311,27 @@ class Router implements RouterInterface
                 '([^\/]+)',
                 $route['path']
             );
-            
+
             // also notice this condition is to handle any additional '}'
             // that could be found !
             $pathPrepared = str_replace('}', '', $pathPrepared);
 
-            // Please Note: we also add the special HTTP Methods HEAD , TRACE , 
+            // Please Note: we also add the special HTTP Methods HEAD , TRACE ,
             // CONNECT, OPTIONS. So the special responses could be handled by
             // the router for eah of these methods
-            if (preg_match('~^' . $pathPrepared . '$~', $path, $parameters) && 
+            if (preg_match('~^' . $pathPrepared . '$~', $path, $parameters) &&
                 in_array(strtolower($method), array_merge($route['method'],
                     ['head' , 'trace' , 'connect', 'options']))
             ) {
                 unset($parameters[0]);
+
+                // Handle the URL decoding for special characters case
+                $parameters = array_map(function ($param) {
+                    return urldecode($param);
+                }, array_values($parameters));
+
                 $parameters = array_values($parameters);
-                
+
                 return $route + ['parameters' => $parameters];
             }
         }
@@ -335,7 +341,7 @@ class Router implements RouterInterface
 
     /**
      * Default page not found handler.
-     * 
+     *
      * @return void
      */
     private function defaultPageNotFoundHandler()
@@ -346,7 +352,7 @@ class Router implements RouterInterface
 
     /**
      * Handle query parameters.
-     * 
+     *
      * @param string $uri
      * @return string
      */
@@ -355,10 +361,10 @@ class Router implements RouterInterface
         if (strpos($uri, '?') === false) {
             return $uri;
         }
-        
+
         // all before "?" is the original uri , where all after are the params
         $extractedParts = explode('?', $uri);
-        
+
         // process query parameters and save them into $_GET
         foreach (explode('&', $extractedParts[1]) as $parameter) {
             $keyVal = explode('=', $parameter);
@@ -370,10 +376,10 @@ class Router implements RouterInterface
 
     /**
      * Get the base path of the server.
-     * 
-     * This is extremely important if you're running your app from Apache or 
+     *
+     * This is extremely important if you're running your app from Apache or
      * Nginx servers directly , without the PHP built in server.
-     * 
+     *
      * @return string
      */
     private function detectBasePath()
@@ -385,18 +391,18 @@ class Router implements RouterInterface
 
     /**
      * Set page not found handler.
-     * 
-     * @param string|array $handler 
+     *
+     * @param string|array $handler
      * @return void
      */
     public function setPageNotFoundHandler($handler)
     {
         $this->pageNotFoundHandler = $handler;
     }
-    
+
     /**
      * Set actions runner.
-     * 
+     *
      * @param string $runner
      * @param array $parameters
      * @return void
@@ -418,7 +424,7 @@ class Router implements RouterInterface
             !in_array(RunnerInterface::class, $interfaces)
         ) {
             throw new InvalidArgumentException(
-                "Invalid runner [{$runner}] , action runner " . 
+                "Invalid runner [{$runner}] , action runner " .
                 "MUST implement RunnerInterface !"
             );
         }
@@ -430,13 +436,13 @@ class Router implements RouterInterface
                 "parameters can only be array !"
             );
         }
-        
+
         $this->actionRunner = new $runner(...$parameters);
     }
 
     /**
      * Get the base URL.
-     * 
+     *
      * @return string
     */
     public function getBaseUrl()
@@ -448,10 +454,10 @@ class Router implements RouterInterface
 
     /**
      * Enable HTTP method override.
-     * 
+     *
      * This only works for POST requests through HTML forms
      * by adding the _method hidden input field.
-     * 
+     *
      * @return void
     */
     public function enableHttpMethodOverride()
@@ -461,7 +467,7 @@ class Router implements RouterInterface
 
     /**
      * Generate URL from route's name.
-     * 
+     *
      * @param string $routeName
      * @param array $parameters
      * @return string
@@ -504,7 +510,7 @@ class Router implements RouterInterface
         }
 
         // we check if the current path still has "}" symbol then
-        // there are some missing parameters , throw exception 
+        // there are some missing parameters , throw exception
         if (strpos($path, '}') !== false) {
             throw new InvalidArgumentException(
                 "Missing parameters for Route {$matchedRoute['name']}"
@@ -513,10 +519,10 @@ class Router implements RouterInterface
 
         return $this->getBaseUrl() . '/' . rtrim($path, '/');
     }
-    
+
     /**
      * Run the router.
-     * 
+     *
      * @return void
      */
     public function run()
@@ -526,7 +532,9 @@ class Router implements RouterInterface
 
         // In case the router was used in sub-directory
         // we remove the host (sub-directory) from the URI
-        if (!empty($this->host)) {
+        // just make sure that the URI and the host are not the
+        // same , otherwise the URI will become empty !!
+        if (!empty($this->host) && $uri != $this->host) {
             $uri = str_replace($this->host, '', $uri);
         }
 
@@ -571,12 +579,12 @@ class Router implements RouterInterface
                     echo "405 , The HTTP method you requested is not allowed\n";
                 }
 
-                echo "The allowed HTTP methods are : " . 
+                echo "The allowed HTTP methods are : " .
                     strtoupper(implode(',', $matchedRoute['method'])) . PHP_EOL;
 
                 // send the allowed methods for the URI
                 header(
-                    "Allow: " . 
+                    "Allow: " .
                     strtoupper(implode(',', $matchedRoute['method']))
                 );
 
@@ -588,13 +596,13 @@ class Router implements RouterInterface
             if (!empty($this->pageNotFoundHandler)) {
                 if (is_string($this->pageNotFoundHandler)) {
                     call_user_func($this->pageNotFoundHandler);
-                } 
-                else if (is_array($this->pageNotFoundHandler) && 
+                }
+                else if (is_array($this->pageNotFoundHandler) &&
                     (count($this->pageNotFoundHandler) == 2)
                 ) {
-                    $pageNotFoundHandlerInstance = new 
+                    $pageNotFoundHandlerInstance = new
                         $this->pageNotFoundHandler[0]();
-                    
+
                     $pageNotFoundHandlerInstance->
                         {$this->pageNotFoundHandler[1]}();
                 }
@@ -613,19 +621,19 @@ class Router implements RouterInterface
         // check if the route has a valid action
         if ((!isset($matchedRoute['action']) || empty($matchedRoute['action']))
             &&
-            (!isset($matchedRoute['controller']) || 
+            (!isset($matchedRoute['controller']) ||
             empty($matchedRoute['controller']))
         ) {
             throw new ActionIsNotDefinedException(
                 "Route {$matchedRoute['path']} doesn't have valid action"
             );
         }
-        
+
         // handle single action controller , we assume that only "__invoke"
         // magic method exists in the controller , so we call it
         if ((!isset($matchedRoute['action']) || empty($matchedRoute['action']))
             &&
-            (isset($matchedRoute['controller']) && 
+            (isset($matchedRoute['controller']) &&
             !empty($matchedRoute['controller']))
         ) {
             $matchedRoute['action'] = '__invoke';
@@ -639,7 +647,7 @@ class Router implements RouterInterface
             foreach ($matchedRoute['middlewares'] as $middleware) {
                 if (is_string($middleware)) {
                     call_user_func($middleware);
-                } 
+                }
                 else if (is_array($middleware) && (count($middleware) == 2)) {
                     $middlewareInstance = new $middleware[0]();
                     $middlewareInstance->{$middleware[1]}();
@@ -653,9 +661,9 @@ class Router implements RouterInterface
         }
 
         // execute route's action
-        $this->actionRunner->execute($matchedRoute);     
+        $this->actionRunner->execute($matchedRoute);
 
-        // handle the HEAD HTTP method 
+        // handle the HEAD HTTP method
         if (strtolower($method) == 'head') {
             ob_end_clean();
         }

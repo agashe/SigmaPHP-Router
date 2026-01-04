@@ -4,7 +4,7 @@ use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
 use SigmaPHP\Router\Tests\Examples\GroupController as ExampleGroupController;
 use SigmaPHP\Router\Tests\Examples\Middleware as ExampleMiddleware;
 use SigmaPHP\Router\Tests\Examples\SingleActionController
-    as ExampleSingleActionController;  
+    as ExampleSingleActionController;
 
 return [
     [
@@ -146,5 +146,11 @@ return [
         'path' => '/test19/http_method_override',
         'method' => 'put',
         'action' => 'route_handler_a',
+    ],
+    [
+        'name' => 'test20',
+        'path' => '/test20/special_chars/{data}',
+        'method' => 'get',
+        'action' => 'route_handler_d',
     ],
 ];
