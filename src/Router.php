@@ -386,7 +386,8 @@ class Router implements RouterInterface
     {
         // we exclude the script name from (SCRIPT_NAME) and whatever remaining
         // that's our base path !
-        return preg_replace('~\/[^\/]+\.php~', '', $_SERVER['SCRIPT_NAME']);
+        return (php_sapi_name() == 'cli-server') ? null :
+            preg_replace('~\/[^\/]+\.php~', '', $_SERVER['SCRIPT_NAME']);
     }
 
     /**
