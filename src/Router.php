@@ -4,12 +4,14 @@ namespace SigmaPHP\Router;
 
 use SigmaPHP\Router\Interfaces\RouterInterface;
 use SigmaPHP\Router\Interfaces\RunnerInterface;
+use SigmaPHP\Router\Interfaces\HandlerInterface;
 use SigmaPHP\Router\Exceptions\RouteNotFoundException;
 use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
 use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 use SigmaPHP\Router\Exceptions\ControllerNotFoundException;
+use SigmaPHP\Router\Handlers\DefaultStaticAssetsHandler;
 use SigmaPHP\Router\Runners\DefaultRunner;
 
 /**
@@ -36,6 +38,16 @@ class Router implements RouterInterface
      * @var RunnerInterface $actionRunner
      */
     private $actionRunner;
+
+    /**
+     * @var string $staticAssetsRoute
+     */
+    private $staticAssetsRoute;
+
+    /**
+     * @var HandlerInterface $staticAssetsHandler
+     */
+    private $staticAssetsHandler;
 
     /**
      * @var bool $httpMethodOverride
@@ -71,6 +83,12 @@ class Router implements RouterInterface
 
         // set default action runner
         $this->actionRunner = new DefaultRunner();
+
+        // set default static assets route's name
+        $this->staticAssetsRoute = 'static-assets';
+
+        // set default static assets handler
+        $this->staticAssetsHandler = new DefaultStaticAssetsHandler();
 
         // load the routes and process
         $this->routes = $this->load($routes);
@@ -445,7 +463,7 @@ class Router implements RouterInterface
      * Get the base URL.
      *
      * @return string
-    */
+     */
     public function getBaseUrl()
     {
         return (!empty($_SERVER['HTTPS']) ? 'https://' : 'http://') .
@@ -460,10 +478,45 @@ class Router implements RouterInterface
      * by adding the _method hidden input field.
      *
      * @return void
-    */
+     */
     public function enableHttpMethodOverride()
     {
         $this->httpMethodOverride = true;
+    }
+
+    /**
+     * Set static assets route name.
+     *
+     * @param string $name
+     * @return void
+     */
+    public function setStaticAssetsRouteName($name)
+    {
+        $this->staticAssetsRoute = $name;
+    }
+
+    /**
+     * Set static assets route handler.
+     *
+     * @param HandlerInterface $handler
+     * @return void
+     */
+    public function setStaticAssetsRouteHandler($handler)
+    {
+        $this->staticAssetsHandler = $handler;
+    }
+
+    /**
+     * Check if static assets route been requested.
+     *
+     * @return bool
+     */
+    public function checkIfStaticAssetsRequest()
+    {
+        return strpos(
+            $_SERVER['REQUEST_URI'],
+            trim($this->staticAssetsRoute, '/')
+        );
     }
 
     /**
@@ -537,6 +590,20 @@ class Router implements RouterInterface
         // same , otherwise the URI will become empty !!
         if (!empty($this->host) && $uri != $this->host) {
             $uri = str_replace($this->host, '', $uri);
+        }
+
+        // handle static assets , this is extremely important
+        // since we are routing all the traffic to /index.php
+        // so requesting a static would be difficult
+        //
+        // to resolve this issue , an special route for static
+        // assets could be defined , and if this route was
+        // matched , a handler could be triggered to serve
+        // the resource
+        if ($this->checkIfStaticAssetsRequest()) {
+            $this->staticAssetsHandler->handle();
+
+            return;
         }
 
         // handle query parameters
