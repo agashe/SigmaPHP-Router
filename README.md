@@ -19,6 +19,7 @@ A fast and simple router for PHP , you can use for your projects to provide user
 * Default page not found (404) handler and you can define custom handler
 * Custom action runners , for advanced customization
 * HTTP method override
+* Static assets routing
 
 ## Installation
 
@@ -54,6 +55,7 @@ Then in the `.htaccess` file , change `index.php` to `public/index.php` , and th
 * [URL Generation](#url-generation)
 * [Action Runners](#action-runners)
 * [HTTP Method Override](#http-method-override)
+* [Static Assets Routing](#static-assets-routing)
 * [Examples](#examples)
 
 ### Basic Setup
@@ -748,6 +750,81 @@ Finally in your HTML form :
 
     <button type="submit">Save</button>
 </form>
+```
+
+### Static Assets Routing 
+
+Handling your static assets , is also one of the key features that SigmaPHP-Router provides , by defining a fixed static Route that points to the files on the server , regardless the method you are using to run your app , usually all traffic will be pointed to your `index.php` , in this case the router is smart enough to check if the requested URL is an defined route , or a resource on the server.
+
+By default the the pre-defined route is called `static-assets` and whatever is following the route should be the full path to the resource on the server , for example:
+
+```
+http://example.com/static-assets/uploads/test.png
+```
+In this case the router will recognize that the requested URL is not a route but a resource , so in this case it will search for the `uploads/test.png` on the server , and will return the file to the user.
+
+Out if the box, the Static Assets Routing is pre-configured , and doesn't require any additional configuration , but a few notes should be highlighted:
+
+1. Make sure that no other route defined in your app is using `static-assets` as a path , otherwise it will collide.
+
+2. In case you're serving your app from a sub-directory on the server , as long as you specified that root path during the Router initialization (`host` parameter !), the Router will automatically prepend that asset path.
+
+3. The default path for the static assets will be the root of the app , so for security it's always better to limit the access to the assets using permission and server guards like:
+
+    - Setting the `-t` while using PHP built-in server , and specifying the default path for the app like for example `public`
+
+        ```
+        php -S localhost:8080 -t ./public index.php
+        ```
+    - Adding `Require all denied` to your `.htaccess` file , while using Apache Server , which will limit the access only to a specific path
+
+    - Using `deny all;` inside the `location` block in your Ngnix Server
+
+In case you are using a different server than the ones mentioned above , please refer to your server's official documentation , and apply the appropriate method to secure your files.
+
+
+Finally, and as usual since SigmaPHP-Router is built with customization in mind , you have the full control to change both the static-assets path , and the handler:
+
+```
+<?php
+
+require 'vendor/autoload.php';
+
+use SigmaPHP\Router\Router;
+
+// initialize the router
+$router = new Router($routes);
+
+// set custom static-assets path
+$router->setStaticAssetsRouteName('/site-public');
+
+// set custom static-assets handler
+$router->setStaticAssetsRouteHandler(MySuperCoolAssetsHandler::class);
+
+// fire the router
+$router->run();
+```
+
+And for your `MySuperCoolAssetsHandler` , you have to make sure that the Handler does implement the `StaticAssetsHandlerInterface` and provide implementation for the `handle` method:
+
+```
+<?php
+
+use SigmaPHP\Router\Interfaces\StaticAssetsHandlerInterface;
+
+class MySuperCoolAssetsHandler implements StaticAssetsHandlerInterface
+{
+    /**
+     * Handle an action triggered by the Router.
+     *
+     * @param string $resourcePath
+     * @return void
+     */
+    public function handle($resourcePath)
+    {
+        readfile($resourcePath);exit;
+    }
+}
 ```
 
 ## Examples
