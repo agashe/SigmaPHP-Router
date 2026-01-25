@@ -23,7 +23,10 @@ class DefaultStaticAssetsHandler implements StaticAssetsHandlerInterface
             http_response_code(404);
             echo "404 , The Requested URL Was Not Found";
         } else {
-            echo file_get_contents($resourceFullPath);
+            header('Content-Type: ' . mime_content_type($resourceFullPath));
+            header('Content-Length: ' . filesize($resourceFullPath));
+
+            readfile($resourceFullPath);
         }
     }
 }

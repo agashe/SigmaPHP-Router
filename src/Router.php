@@ -601,8 +601,13 @@ class Router implements RouterInterface
         // matched , a handler could be triggered to serve
         // the resource
         if ($this->checkIfStaticAssetsRequest()) {
+            // we add the "host" before the resource path , since the app
+            // might be inside some sub-folder , depending on the "host"
+            // finally , we remove the additional "/" before any processing
+            // you know , just in case :)
             $this->staticAssetsHandler->handle(
-                $this->host . '/'. trim(str_replace(
+                ($this->host ? $this->host . '/' : '') .
+                trim(str_replace(
                     trim($this->staticAssetsRoute, '/'),
                     '',
                     $_SERVER['REQUEST_URI']
