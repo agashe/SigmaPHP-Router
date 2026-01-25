@@ -4,7 +4,7 @@ namespace SigmaPHP\Router;
 
 use SigmaPHP\Router\Interfaces\RouterInterface;
 use SigmaPHP\Router\Interfaces\RunnerInterface;
-use SigmaPHP\Router\Interfaces\HandlerInterface;
+use SigmaPHP\Router\Interfaces\StaticAssetsHandlerInterface;
 use SigmaPHP\Router\Exceptions\RouteNotFoundException;
 use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
@@ -45,7 +45,7 @@ class Router implements RouterInterface
     private $staticAssetsRoute;
 
     /**
-     * @var HandlerInterface $staticAssetsHandler
+     * @var StaticAssetsHandlerInterface $staticAssetsHandler
      */
     private $staticAssetsHandler;
 
@@ -513,7 +513,7 @@ class Router implements RouterInterface
      */
     public function checkIfStaticAssetsRequest()
     {
-        return strpos(
+        return (bool) strpos(
             $_SERVER['REQUEST_URI'],
             trim($this->staticAssetsRoute, '/')
         );
@@ -601,7 +601,13 @@ class Router implements RouterInterface
         // matched , a handler could be triggered to serve
         // the resource
         if ($this->checkIfStaticAssetsRequest()) {
-            $this->staticAssetsHandler->handle();
+            $this->staticAssetsHandler->handle(
+                $this->host . '/'. trim(str_replace(
+                    trim($this->staticAssetsRoute, '/'),
+                    '',
+                    $_SERVER['REQUEST_URI']
+                ), '/')
+            );
 
             return;
         }

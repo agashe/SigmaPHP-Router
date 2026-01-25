@@ -68,7 +68,7 @@ interface RouterInterface
     /**
      * Set static assets route handler.
      *
-     * @param \DefaultStaticAssetsHandler $handler
+     * @param StaticAssetsHandlerInterface $handler
      * @return void
      */
     public function setStaticAssetsRouteHandler($handler);

@@ -1380,4 +1380,46 @@ class RouterTest extends TestCase
         // assert result
         $this->expectOutputString('!@$%^&*()_ ~`;",.<>');
     }
+
+    /**
+     * Test router can serve static assets.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterCanServeStaticAssets()
+    {
+        $_SERVER['REQUEST_URI'] = '/static-assets/examples/asset.txt';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router($this->routes, __DIR__);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("Hello, World !\n");
+    }
+
+    /**
+     * Test router will return 404 , if the request static asset is not found.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillReturn404IfTheRequestStaticAssetIsNotFound()
+    {
+        $_SERVER['REQUEST_URI'] = '/static-assets/not-found.txt';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router($this->routes, __DIR__);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("404 , The Requested URL Was Not Found");
+    }
 }

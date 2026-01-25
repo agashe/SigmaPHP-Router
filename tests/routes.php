@@ -153,4 +153,16 @@ return [
         'method' => 'get',
         'action' => 'route_handler_d',
     ],
+    [
+        'name' => 'test21',
+        'path' => '/static-assets/examples/asset.txt',
+        'method' => 'get',
+        'action' => 'route_handler_a',
+    ],
+    [
+        'name' => 'test22',
+        'path' => '/static-assets/not-found.txt',
+        'method' => 'get',
+        'action' => 'route_handler_a',
+    ],
 ];
