@@ -232,7 +232,7 @@ class Router implements RouterInterface
             $routes[$key] = $route;
         }
 
-        // check for duplicated routes' names
+        // check for duplicated route names
         $nonOptionalRoutes = array_filter($routes, function ($route) {
             return !isset($route['optional']);
         });
@@ -247,6 +247,17 @@ class Router implements RouterInterface
         if (!empty($duplicateRouteNames)) {
             throw new DuplicatedRouteNamesException(
                 "Route [{$duplicateRouteNames[0]}] is defined multiple times"
+            );
+        }
+
+        // check that static-assets route is not used in the routes array
+        $staticAssetsRouteIsUsed = array_filter($routes, function ($route) {
+            return preg_match('~^(\/?)' . $this->staticAssetsRoute . '(\/?)$~', $route['path']);
+        });
+
+        if (!empty($staticAssetsRouteIsUsed)) {
+            throw new DuplicatedRoutesException(
+                "Route [{$this->staticAssetsRoute}] is defined multiple times"
             );
         }
 

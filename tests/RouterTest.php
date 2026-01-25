@@ -1422,4 +1422,25 @@ class RouterTest extends TestCase
         // assert result
         $this->expectOutputString("404 , The Requested URL Was Not Found");
     }
+
+    /**
+     * Test router will through exception if the static assets route is used in
+     * by the developer.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterThroughExceptionIfStaticAssetsIsUsedInByTheDev()
+    {
+        $this->expectException(DuplicatedRoutesException::class);
+
+        $duplicatedRoutes = array_merge($this->routes, [
+            [
+                'path' => 'static-assets/',
+                'action' => 'route_handler_a',
+            ]
+        ]);
+
+        $router = new Router($duplicatedRoutes);
+    }
 }
