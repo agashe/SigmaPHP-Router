@@ -796,7 +796,7 @@ use SigmaPHP\Router\Router;
 $router = new Router($routes);
 
 // set custom static-assets path
-$router->setStaticAssetsRouteName('/site-public');
+$router->setStaticAssetsRoutePath('/site-public');
 
 // set custom static-assets handler
 $router->setStaticAssetsRouteHandler(MySuperCoolAssetsHandler::class);

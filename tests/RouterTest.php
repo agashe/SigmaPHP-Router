@@ -15,6 +15,8 @@ use SigmaPHP\Router\Tests\Examples\InvalidRunner as ExampleInvalidRunner;
 use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
 use SigmaPHP\Router\Tests\Examples\PageNotFoundHandler
     as ExamplePageNotFoundHandler;
+use SigmaPHP\Router\Tests\Examples\StaticAssetsHandler
+    as ExampleStaticAssetsHandler;
 
 require('route_handlers.php');
 
@@ -1442,5 +1444,53 @@ class RouterTest extends TestCase
         ]);
 
         $router = new Router($duplicatedRoutes);
+    }
+
+    /**
+     * Test static assets path can be changed.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testStaticAssetsPathCanBeChanged()
+    {
+        $_SERVER['REQUEST_URI'] = '/my-custom-path/examples/asset.txt';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router($this->routes, __DIR__);
+
+        // set custom static assets path
+        $router->setStaticAssetsRoutePath('my-custom-path');
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("Hello, World !\n");
+    }
+
+    /**
+     * Test static assets handler can be changed.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testServeStaticHandlerCanBeChanged()
+    {
+        $_SERVER['REQUEST_URI'] = '/static-assets/examples/asset.txt';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router($this->routes, __DIR__);
+
+        // set custom static assets handler
+        $router->setStaticAssetsRouteHandler(new ExampleStaticAssetsHandler());
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("Custom Static Assets Handler !\n");
     }
 }

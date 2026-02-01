@@ -496,14 +496,14 @@ class Router implements RouterInterface
     }
 
     /**
-     * Set static assets route name.
+     * Set static assets route path.
      *
-     * @param string $name
+     * @param string $path
      * @return void
      */
-    public function setStaticAssetsRouteName($name)
+    public function setStaticAssetsRoutePath($path)
     {
-        $this->staticAssetsRoute = $name;
+        $this->staticAssetsRoute = $path;
     }
 
     /**
