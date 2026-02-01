@@ -34,7 +34,7 @@ interface RouterInterface
     /**
      * Set actions runner.
      *
-     * @param string $runner
+     * @param RunnerInterface $runner
      * @param array $parameters
      * @return void
      */

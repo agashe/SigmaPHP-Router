@@ -84,7 +84,7 @@ class Router implements RouterInterface
         $this->pageNotFoundHandler = DefaultPageNotFoundHandler::class;
 
         // set default action runner
-        $this->actionRunner = new DefaultRunner();
+        $this->setActionRunner(DefaultRunner::class);
 
         // set default static assets route's name
         $this->staticAssetsRoute = 'static-assets';
@@ -447,7 +447,10 @@ class Router implements RouterInterface
     /**
      * Set actions runner.
      *
-     * @param string $runner
+     * Please not this is a factory method , so it will create a new object
+     * of the runner , and bind the parameters.
+     *
+     * @param RunnerInterface $runner
      * @param array $parameters
      * @return void
      */
@@ -481,7 +484,7 @@ class Router implements RouterInterface
             );
         }
 
-        $this->actionRunner = new $runner(...$parameters);
+        $this->actionRunner = new ($runner)(...$parameters);
     }
 
     /**
