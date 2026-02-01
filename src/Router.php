@@ -88,7 +88,7 @@ class Router implements RouterInterface
         $this->staticAssetsRoute = 'static-assets';
 
         // set default static assets handler
-        $this->staticAssetsHandler = new DefaultStaticAssetsHandler();
+        $this->staticAssetsHandler = DefaultStaticAssetsHandler::class;
 
         // load the routes and process
         $this->routes = $this->load($routes);
@@ -509,7 +509,7 @@ class Router implements RouterInterface
     /**
      * Set static assets route handler.
      *
-     * @param HandlerInterface $handler
+     * @param StaticAssetsHandlerInterface $handler
      * @return void
      */
     public function setStaticAssetsRouteHandler($handler)
@@ -616,7 +616,7 @@ class Router implements RouterInterface
             // might be inside some sub-folder , depending on the "host"
             // finally , we remove the additional "/" before any processing
             // you know , just in case :)
-            $this->staticAssetsHandler->handle(
+            (new ($this->staticAssetsHandler)())->handle(
                 ($this->host ? $this->host . '/' : '') .
                 trim(str_replace(
                     trim($this->staticAssetsRoute, '/'),

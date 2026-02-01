@@ -1485,7 +1485,7 @@ class RouterTest extends TestCase
         $router = new Router($this->routes, __DIR__);
 
         // set custom static assets handler
-        $router->setStaticAssetsRouteHandler(new ExampleStaticAssetsHandler());
+        $router->setStaticAssetsRouteHandler(ExampleStaticAssetsHandler::class);
 
         // run the router
         $router->run();
