@@ -5,6 +5,7 @@ namespace SigmaPHP\Router;
 use SigmaPHP\Router\Interfaces\RouterInterface;
 use SigmaPHP\Router\Interfaces\RunnerInterface;
 use SigmaPHP\Router\Interfaces\StaticAssetsHandlerInterface;
+use SigmaPHP\Router\Interfaces\PageNotFoundHandlerInterface;
 use SigmaPHP\Router\Exceptions\RouteNotFoundException;
 use SigmaPHP\Router\Exceptions\InvalidArgumentException;
 use SigmaPHP\Router\Exceptions\DuplicatedRoutesException;
@@ -12,6 +13,7 @@ use SigmaPHP\Router\Exceptions\ActionIsNotDefinedException;
 use SigmaPHP\Router\Exceptions\DuplicatedRouteNamesException;
 use SigmaPHP\Router\Exceptions\ControllerNotFoundException;
 use SigmaPHP\Router\Handlers\DefaultStaticAssetsHandler;
+use SigmaPHP\Router\Handlers\DefaultPageNotFoundHandler;
 use SigmaPHP\Router\Runners\DefaultRunner;
 
 /**
@@ -30,7 +32,7 @@ class Router implements RouterInterface
     private $host;
 
     /**
-     * @var string $pageNotFoundHandler
+     * @var PageNotFoundHandlerInterface $pageNotFoundHandler
      */
     private $pageNotFoundHandler;
 
@@ -79,7 +81,7 @@ class Router implements RouterInterface
         $this->host = ($host == null) ? $this->detectBasePath() : $host;
 
         // set page not found handler to null (to trigger the default handler)
-        $this->pageNotFoundHandler = null;
+        $this->pageNotFoundHandler = DefaultPageNotFoundHandler::class;
 
         // set default action runner
         $this->actionRunner = new DefaultRunner();
@@ -369,17 +371,6 @@ class Router implements RouterInterface
     }
 
     /**
-     * Default page not found handler.
-     *
-     * @return void
-     */
-    private function defaultPageNotFoundHandler()
-    {
-        http_response_code(404);
-        echo "404 , The Requested URL Was Not Found";
-    }
-
-    /**
      * Handle query parameters.
      *
      * @param string $uri
@@ -420,13 +411,36 @@ class Router implements RouterInterface
     }
 
     /**
+     * Check if class implements an interface.
+     *
+     * @param object|string $class
+     * @param string $interface
+     * @return bool
+     */
+    private function checkClassIsImplementingInterface($class, $interface)
+    {
+        return in_array($interface, (class_implements($class) ?? []));
+    }
+
+    /**
      * Set page not found handler.
      *
-     * @param string|array $handler
+     * @param PageNotFoundHandlerInterface $handler
      * @return void
      */
     public function setPageNotFoundHandler($handler)
     {
+        if (!$this->checkClassIsImplementingInterface(
+                $handler,
+                PageNotFoundHandlerInterface::class
+            )
+        ) {
+            throw new InvalidArgumentException(
+                "Invalid handler [{$handler}] , page not found handler " .
+                "MUST implement PageNotFoundHandlerInterface !"
+            );
+        }
+
         $this->pageNotFoundHandler = $handler;
     }
 
@@ -448,10 +462,10 @@ class Router implements RouterInterface
             );
         }
 
-        $interfaces = class_implements($runner);
-
-        if (empty($interfaces) ||
-            !in_array(RunnerInterface::class, $interfaces)
+        if (!$this->checkClassIsImplementingInterface(
+                $runner,
+                RunnerInterface::class
+            )
         ) {
             throw new InvalidArgumentException(
                 "Invalid runner [{$runner}] , action runner " .
@@ -514,6 +528,17 @@ class Router implements RouterInterface
      */
     public function setStaticAssetsRouteHandler($handler)
     {
+        if (!$this->checkClassIsImplementingInterface(
+                $handler,
+                StaticAssetsHandlerInterface::class
+            )
+        ) {
+            throw new InvalidArgumentException(
+                "Invalid handler [{$handler}] , static assets handler " .
+                "MUST implement StaticAssetsHandlerInterface !"
+            );
+        }
+
         $this->staticAssetsHandler = $handler;
     }
 
@@ -683,27 +708,7 @@ class Router implements RouterInterface
 
         // handle page not found case
         if (empty($matchedRoute)) {
-            if (!empty($this->pageNotFoundHandler)) {
-                if (is_string($this->pageNotFoundHandler)) {
-                    call_user_func($this->pageNotFoundHandler);
-                }
-                else if (is_array($this->pageNotFoundHandler) &&
-                    (count($this->pageNotFoundHandler) == 2)
-                ) {
-                    $pageNotFoundHandlerInstance = new
-                        $this->pageNotFoundHandler[0]();
-
-                    $pageNotFoundHandlerInstance->
-                        {$this->pageNotFoundHandler[1]}();
-                }
-                else {
-                    throw new InvalidArgumentException(
-                        "Invalid pageNotFoundHandler"
-                    );
-                }
-            } else {
-                $this->defaultPageNotFoundHandler();
-            }
+            (new ($this->pageNotFoundHandler)())->handle();
 
             return;
         }

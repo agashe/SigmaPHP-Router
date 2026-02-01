@@ -16,10 +16,6 @@ function route_handler_d($data = 'nothing was received') {
     echo $data;
 }
 
-function route_not_found_handler() {
-    echo "This is a custom page not found handler";
-}
-
 function custom_middleware() {
     echo "Middleware function.";
 }

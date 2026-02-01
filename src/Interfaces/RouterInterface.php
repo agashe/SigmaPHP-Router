@@ -26,7 +26,7 @@ interface RouterInterface
     /**
      * Set page not found handler.
      *
-     * @param string|array $handler
+     * @param PageNotFoundHandlerInterface $handler
      * @return void
      */
     public function setPageNotFoundHandler($handler);

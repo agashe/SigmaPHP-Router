@@ -1,5 +1,6 @@
 <?php
 
+use PhpParser\Node\Expr\Cast\Object_;
 use SigmaPHP\Router\Router;
 use PHPUnit\Framework\TestCase;
 use SigmaPHP\Router\Exceptions\RouteNotFoundException;
@@ -505,32 +506,6 @@ class RouterTest extends TestCase
     }
 
     /**
-     * Test router can use custom handler for page not found.
-     *
-     * @runInSeparateProcess
-     * @return void
-     */
-    public function testRouterCanUseCustomHandlerForPageNotFound()
-    {
-        $_SERVER['REQUEST_URI'] = '/page-not-found';
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-
-        // create new router instance
-        $router = new Router($this->routes);
-
-        // set custom page not found handler
-        $router->setPageNotFoundHandler('route_not_found_handler');
-
-        // run the router
-        $router->run();
-
-        // assert result
-        $this->expectOutputString(
-            "This is a custom page not found handler"
-        );
-    }
-
-    /**
      * Test route groups.
      *
      * @runInSeparateProcess
@@ -909,12 +884,12 @@ class RouterTest extends TestCase
     }
 
     /**
-     * Test custom handler for page not found can be a class.
+     * Test custom handler for page not found.
      *
      * @runInSeparateProcess
      * @return void
      */
-    public function testCustomHandlerForPageNotFoundCanBeAClass()
+    public function testCustomHandlerForPageNotFound()
     {
         $_SERVER['REQUEST_URI'] = '/page-not-found';
         $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -923,10 +898,7 @@ class RouterTest extends TestCase
         $router = new Router($this->routes);
 
         // set custom page not found handler
-        $router->setPageNotFoundHandler([
-            ExamplePageNotFoundHandler::class,
-            'handler'
-        ]);
+        $router->setPageNotFoundHandler(ExamplePageNotFoundHandler::class);
 
         // run the router
         $router->run();
@@ -955,7 +927,7 @@ class RouterTest extends TestCase
         $router = new Router($this->routes);
 
         // set custom page not found handler
-        $router->setPageNotFoundHandler([null]);
+        $router->setPageNotFoundHandler(stdClass::class);
 
         // run the router
         $router->run();
@@ -1492,5 +1464,29 @@ class RouterTest extends TestCase
 
         // assert result
         $this->expectOutputString("Custom Static Assets Handler !\n");
+    }
+
+    /**
+     * Test router will through exception if the static assets handler
+     * is invalid.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillThroughExceptionIfInvalidStaticAssetsHandler()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $_SERVER['REQUEST_URI'] = '/static-assets/examples/asset.txt';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router($this->routes);
+
+        // set custom static assets handler
+        $router->setStaticAssetsRouteHandler(stdClass::class);
+
+        // run the router
+        $router->run();
     }
 }

@@ -490,9 +490,9 @@ For the routes definition , nothing changed all features are implemented as regu
 
 ### Page not found handling 
 
-By default in case the requested URI didn't match , the router will return 404 HTTP status code , with simple message `404 , The Requested URL Was Not Found`
+By default in case the requested URI didn't match , the router will return 404 HTTP status code , with simple message `404 , The Requested URL Was Not Found`.
 
-You change this default behavior by passing a custom handler name as an argument to the method `setPageNotFoundHandler` 
+You can change this default behavior by passing a custom handler class as an argument to the method `setPageNotFoundHandler` 
 
 ```
 <?php
@@ -515,7 +515,7 @@ $routes = [
 $router = new Router($routes);
 
 // set custom 404 (Page Not Found) handler
-$router->setPageNotFoundHandler('my_custom_404_handler');
+$router->setPageNotFoundHandler(MyCustomPageNotFoundHandler::class);
 
 // fire the router
 $router->run();
@@ -531,13 +531,20 @@ function my_custom_404_handler() {
 
 So now you can add your custom 404 message , page design or redirect the user another route.
 
-And as usual you can instead of using function handler , you can use a class , so you pass class name and the method name :
+And as for the custom handler , it should implement the `PageNotFoundHandlerInterface` :
 
 ```
-// set custom 404 (Page Not Found) handler
-$router->setPageNotFoundHandler([
-    MyCustomPageNotFoundHandler::class, 'handle'
-]);
+<?php
+
+use SigmaPHP\Router\Interfaces\PageNotFoundHandlerInterface;
+
+class MyCustomPageNotFoundHandler implements PageNotFoundHandlerInterface
+{
+    public function handle()
+    {
+        echo "My Custom Page Not Found Handler !\n";
+    }
+}
 ```
 
 ### URL Generation

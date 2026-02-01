@@ -5,7 +5,7 @@ namespace SigmaPHP\Router\Interfaces;
 /**
  * Static Assets Handler Interface
  */
-interface StaticAssetsHandlerInterface
+interface StaticAssetsHandlerInterface extends HandlerInterface
 {
     /**
      * Handle an action triggered by the Router.
