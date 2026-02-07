@@ -519,14 +519,6 @@ $router->setPageNotFoundHandler(MyCustomPageNotFoundHandler::class);
 
 // fire the router
 $router->run();
-
-.... and somewhere in your code , you define that function :
-
-function my_custom_404_handler() {
-    http_response_code(404);
-    echo "<h1>My custom message</h1>";
-    exit();
-}
 ```
 
 So now you can add your custom 404 message , page design or redirect the user another route.
