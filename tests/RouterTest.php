@@ -14,6 +14,7 @@ use SigmaPHP\Router\Tests\Examples\Runner as ExampleRunner;
 use SigmaPHP\Router\Tests\Examples\ParamRunner as ExampleParamRunner;
 use SigmaPHP\Router\Tests\Examples\InvalidRunner as ExampleInvalidRunner;
 use SigmaPHP\Router\Tests\Examples\Controller as ExampleController;
+use SigmaPHP\Router\Tests\Examples\Middleware as ExampleMiddleware;
 use SigmaPHP\Router\Tests\Examples\PageNotFoundHandler
     as ExamplePageNotFoundHandler;
 use SigmaPHP\Router\Tests\Examples\StaticAssetsHandler
@@ -1485,6 +1486,83 @@ class RouterTest extends TestCase
 
         // set custom static assets handler
         $router->setStaticAssetsRouteHandler(stdClass::class);
+
+        // run the router
+        $router->run();
+    }
+
+    /**
+     * Test default method names could be used with middlewares.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testDefaultMethodNamesCouldBeUsedWithMiddlewares()
+    {
+        $_SERVER['REQUEST_URI'] = '/testing/test-middleware-default-method';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router([
+            [
+                'path' => '/test',
+                'method' => 'get',
+                'action' => 'test',
+                'middlewares' => [
+                    ExampleMiddleware::class,
+                ],
+            ],
+            [
+                'group' => 'test_default_method_middleware',
+                'prefix' => 'testing/',
+                'middlewares' => [
+                    ExampleMiddleware::class,
+                ],
+                'routes' => [
+                    [
+                        'path' => '/test-middleware-default-method',
+                        'action' => 'route_handler_a',
+                    ],
+                ]
+            ]
+        ]);
+
+        $router->setDefaultMiddlewareMethodName('handler');
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString(
+            "Middleware is working.some data"
+        );
+    }
+
+    /**
+     * Test router will through exception if the no default handler for
+     * middlewares were set.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterThroughExceptionIfNoDefaultHandlerForMiddlewares()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $_SERVER['REQUEST_URI'] = '/test';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router([
+            [
+                'path' => '/test',
+                'method' => 'get',
+                'action' => 'test',
+                'middlewares' => [
+                    ExampleMiddleware::class,
+                ],
+            ]
+        ]);
 
         // run the router
         $router->run();

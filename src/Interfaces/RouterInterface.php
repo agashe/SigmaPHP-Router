@@ -79,4 +79,12 @@ interface RouterInterface
      * @return bool
      */
     public function checkIfStaticAssetsRequest();
+
+    /**
+     * Set default middleware method's name.
+     *
+     * @param string $method
+     * @return void
+     */
+    public function setDefaultMiddlewareMethodName($method);
 }

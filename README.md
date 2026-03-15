@@ -450,6 +450,44 @@ class AuthMiddleware
     }
 }
 ```
+For class based middleware, SigmaPHP-Router provides one helpful method to set the default middleware's handler method, so you don't have to keep passing the handler method.
+
+```
+<?php
+
+require 'vendor/autoload.php';
+
+use SigmaPHP\Router\Router;
+
+// initialize the router
+$router = new Router($routes);
+
+// set default middleware's methods
+$router->setDefaultMiddlewareMethodName('handle');
+
+// fire the router
+$router->run();
+```
+So, in your routes definitions, you just call the middleware class:
+
+```
+$routes = [
+    [
+        'name' => 'orders.create',
+        'path' => '/orders',
+        'method' => 'post',
+        'middlewares' => [
+            AuthMiddleware::class,
+            UserCanCreateOrderMiddleware::class,
+        ],
+        'controller' => OrderController::class,
+        'action' => 'create'
+    ],
+];
+```
+
+But we have to make sure that both `AuthMiddleware` and `UserCanCreateOrderMiddleware` are implementing the `handle` method !
+
 ### Route Groups
 Group routes is an essential feature for any router , so you can apply certain prefix or middleware to a group of routes.
 

@@ -57,6 +57,11 @@ class Router implements RouterInterface
     private $httpMethodOverride;
 
     /**
+     * @var string $defaultMiddlewareMethodName
+     */
+    private $defaultMiddlewareMethodName;
+
+    /**
      * @var array $httpMethods
      */
     private $httpMethods = [
@@ -559,6 +564,21 @@ class Router implements RouterInterface
     }
 
     /**
+     * Set default middleware method's name.
+     *
+     * @param string $method
+     * @return void
+     */
+    public function setDefaultMiddlewareMethodName($method)
+    {
+        // This will only be used for class based middlewares, where
+        // you can make all your middlewares share same entry point,
+        // so no need to pass the method name every time
+
+        $this->defaultMiddlewareMethodName = $method;
+    }
+
+    /**
      * Generate URL from route's name.
      *
      * @param string $routeName
@@ -744,7 +764,22 @@ class Router implements RouterInterface
         ) {
             foreach ($matchedRoute['middlewares'] as $middleware) {
                 if (is_string($middleware)) {
-                    call_user_func($middleware);
+                    // in case the string isa class (e.g XXX::class)
+                    // we use the default middleware method, otherwise
+                    // we try to call as a function
+                    if (class_exists($middleware)) {
+                        if (empty($this->defaultMiddlewareMethodName)) {
+                            throw new InvalidArgumentException(
+                                "Unknown handle method for {$middleware}"
+                            );
+                        }
+
+                        $middlewareInstance = new $middleware();
+                        $middlewareInstance->
+                            {$this->defaultMiddlewareMethodName}();
+                    } else {
+                        call_user_func($middleware);
+                    }
                 }
                 else if (is_array($middleware) && (count($middleware) == 2)) {
                     $middlewareInstance = new $middleware[0]();
