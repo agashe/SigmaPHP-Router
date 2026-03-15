@@ -391,9 +391,11 @@ class Router implements RouterInterface
         $extractedParts = explode('?', $uri);
 
         // process query parameters and save them into $_GET
-        foreach (explode('&', $extractedParts[1]) as $parameter) {
-            $keyVal = explode('=', $parameter);
-            $_GET[$keyVal[0]] = $keyVal[1];
+        if (!empty($extractedParts[1])) {
+            foreach (explode('&', $extractedParts[1]) as $parameter) {
+                $keyVal = explode('=', $parameter);
+                $_GET[$keyVal[0]] = $keyVal[1];
+            }
         }
 
         return $extractedParts[0];
