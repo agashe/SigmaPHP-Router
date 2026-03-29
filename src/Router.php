@@ -559,9 +559,9 @@ class Router implements RouterInterface
      */
     public function checkIfStaticAssetsRequest()
     {
-        return (bool) strpos(
-            $_SERVER['REQUEST_URI'],
-            trim($this->staticAssetsRoute, '/')
+        return (bool) preg_match(
+            "~^\/" . trim($this->staticAssetsRoute, '/') . "~",
+            $_SERVER['REQUEST_URI']
         );
     }
 

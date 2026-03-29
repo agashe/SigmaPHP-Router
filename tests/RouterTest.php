@@ -1492,6 +1492,28 @@ class RouterTest extends TestCase
     }
 
     /**
+     * Test router will not match the static asset path's name with any other
+     * route.
+     *
+     * @runInSeparateProcess
+     * @return void
+     */
+    public function testRouterWillNotMatchTheStaticAssetPathWithAnyOtherRoute()
+    {
+        $_SERVER['REQUEST_URI'] = '/test2/static-assets';
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        // create new router instance
+        $router = new Router($this->routes, __DIR__);
+
+        // run the router
+        $router->run();
+
+        // assert result
+        $this->expectOutputString("static-assets was received");
+    }
+
+    /**
      * Test default method names could be used with middlewares.
      *
      * @runInSeparateProcess
